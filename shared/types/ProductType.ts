@@ -1,12 +1,12 @@
-export type Product = {
+export type ProductType = {
   availabilityStatus: string
-  brand: string
+  brand?: string
   category: string
   description: string
   dimensions: Dimension
-  discountPercentage:10.48
+  discountPercentage: number
   id: number
-  images: number[]
+  images: string[]
   meta: Meta
   minimumOrderQuantity: number
   price: number
@@ -37,7 +37,9 @@ type Meta = {
 }
 
 type Review = {
-  depth: number
-  height: number
-  width: number
+  "rating": number,
+  "comment": string,
+  "date": string,
+  "reviewerName": string,
+  "reviewerEmail": string
 }
