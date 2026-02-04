@@ -2,7 +2,15 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  future: { compatibilityVersion: 4 },
   vite: {
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: '@use "~/assets/styles/_mixins.scss" as *;'
+        }
+      }
+    },
     server: {
       hmr: {
         port: 3008
@@ -13,5 +21,10 @@ export default defineNuxtConfig({
     }
   },
   css: ['~/assets/styles/main.scss'],
-  modules: ['@nuxt/image', '@nuxt/eslint', '@nuxt/test-utils/module',]
+  modules: [
+    '@nuxt/image',
+    '@nuxt/eslint',
+    '@nuxt/test-utils/module',
+    '@pinia/nuxt',
+  ]
 })
