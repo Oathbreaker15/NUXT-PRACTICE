@@ -32,7 +32,7 @@ const availabilityStatusClass = computed(() => {
       :alt="`Image for ${props.product.title} product`"
       loading="lazy"
       :placeholder="fallbackProductImg"
-      width="268px"
+      width="200px"
       height="200px"
       @error="handleImageError"
     />
@@ -87,7 +87,7 @@ const availabilityStatusClass = computed(() => {
   box-sizing: border-box;
   border-radius: 12px;
   border: 2px solid var(--grey-light);
-  padding: 16px;
+  padding: 14px;
   cursor: pointer;
 
   &:has(.product__info-availability_out-of-stock) {
@@ -112,16 +112,15 @@ const availabilityStatusClass = computed(() => {
   .product__info {
     display: flex;
     flex-direction: column;
-    margin-top: auto;
+    height: 100%;
 
     :deep(.highlight) {
       background: var(--brand-light);
     }
 
     &-title {
-      font-size: 25px;
+      font-size: 20px;
       font-weight: 700;
-      line-height: 32px;
       color: var(--black);
     }
 
@@ -156,8 +155,9 @@ const availabilityStatusClass = computed(() => {
     &-common {
       color: var(--dark-grey);
       margin-top: var(--margin-top-8);
+      margin-bottom: var(--margin-bottom-12);
 
-      > * {
+      > *:not(p:first-of-type) {
         margin-top: var(--margin-top-4);
       }
 
@@ -180,7 +180,7 @@ const availabilityStatusClass = computed(() => {
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      margin-top: var(--margin-top-8);
+      margin-top: auto;
     }
 
     &-availability_in-stock {

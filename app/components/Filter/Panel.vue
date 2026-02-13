@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { FilterPageStore } from '~/store/FilterPage'
 import type { ProductsFiltersAPIResponse } from '~~/shared/types/Product/API/ProductsFiltersAPIResponse'
+import { useDeviceType } from '#imports'
 
 const emit = defineEmits<{
   (e: 'reset-filters'): void
@@ -9,10 +10,12 @@ const emit = defineEmits<{
   (e: 'toggle-panel-view'): void
 }>()
 
+const props = defineProps<{ filters: ProductsFiltersAPIResponse; closeOnDevice?: () => void }>()
+
+const { isDesktop } = useDeviceType()
 const store = FilterPageStore()
 const { isResetBtnDisabled, filterObj, panelItemsOpenedState, isPanelAllOpened } =
   storeToRefs(store)
-const props = defineProps<{ filters: ProductsFiltersAPIResponse }>()
 </script>
 
 <template>
@@ -23,6 +26,8 @@ const props = defineProps<{ filters: ProductsFiltersAPIResponse }>()
       <span class="filter__title-toggle" @click="emit('toggle-panel-view')">{{
         isPanelAllOpened ? 'Collapse all' : 'Expand all'
       }}</span>
+
+      <span v-if="!isDesktop" class="filter__title-close" @click="closeOnDevice"></span>
     </div>
 
     <form class="filter__form">
@@ -60,14 +65,30 @@ const props = defineProps<{ filters: ProductsFiltersAPIResponse }>()
     border-radius: 8px 8px 0 0;
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
+    height: 46px;
+
+    .filter__title {
+      text-transform: uppercase;
+      font-weight: bold;
+    }
 
     .filter__title-toggle {
       cursor: pointer;
+      margin-left: auto;
 
       &:hover {
         text-decoration: underline;
       }
+    }
+
+    .filter__title-close {
+      width: 16px;
+      height: 16px;
+      color: var(--white);
+      background: url('~/assets/svg/close.svg') no-repeat 0 0;
+      background-size: cover;
+      margin-left: 12px;
     }
   }
 
@@ -90,6 +111,14 @@ const props = defineProps<{ filters: ProductsFiltersAPIResponse }>()
     &:not(:disabled) {
       cursor: pointer;
       @include hover-active-opacity(0.6);
+    }
+  }
+
+  @media (max-width: 1095px) {
+    .filter__form {
+      height: calc(100vh - 46px);
+      background: var(--grey-light-opaque);
+      overflow: auto;
     }
   }
 }

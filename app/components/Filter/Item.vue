@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { CATEGORIES_NAMES } from '~/constants/product/categoriesNames';
+import { CATEGORIES_NAMES } from '~/constants/product/categoriesNames'
 
 type Filter = {
   name: keyof ProductsFiltersAPIResponse
   filter: string[]
-  filterObj: ProductsFiltersAPIResponse,
+  filterObj: ProductsFiltersAPIResponse
   isPanelOpened: boolean
 }
 
 const emit = defineEmits<{
-  (e: 'select-filter-value', category: keyof ProductsFiltersAPIResponse, filterParam: string): void,
+  (e: 'select-filter-value', category: keyof ProductsFiltersAPIResponse, filterParam: string): void
   (e: 'toggle-panel-item-view', category: keyof ProductsFiltersAPIResponse): void
 }>()
 
@@ -17,14 +17,13 @@ const props = defineProps<Filter>()
 const isToggled = ref(false)
 
 const isChecked = (value: string) => {
-  const selected = props.filterObj[props.name];
-  return Array.isArray(selected) && selected.includes(value);
-};
+  const selected = props.filterObj[props.name]
+  return Array.isArray(selected) && selected.includes(value)
+}
 
 const toggleItemVisibility = (category: keyof ProductsFiltersAPIResponse) => {
   emit('toggle-panel-item-view', category)
 }
-
 </script>
 
 <template>
@@ -113,6 +112,8 @@ const toggleItemVisibility = (category: keyof ProductsFiltersAPIResponse) => {
   .filter-item__value {
     margin-top: 12px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
 
     @media (hover: hover) {
       &:hover .filter-item__value-name {

@@ -62,7 +62,12 @@ html,
 body {
   font-family: PTSans, sans-serif;
   letter-spacing: 0.5px;
-  color: var(--black)
+  color: var(--black);
+  font-size: 15px;
+}
+
+.overflow-hidden {
+  overflow: hidden;
 }
 
 h1,

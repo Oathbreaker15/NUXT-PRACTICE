@@ -4,13 +4,13 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
 
 <template>
   <div class="products__search-and-sort-panel">
-    <div class="skeleton__block">
+    <div :style="setBlockSize(307, 30)" class="skeleton__block">
       <div :style="setBlockSize(120, 18)" class="skeleton__block-item"></div>
 
       <div :style="setBlockSize(207, 30)" class="skeleton__block-item"></div>
     </div>
 
-    <div class="skeleton__block">
+    <div :style="setBlockSize(128, 30)" class="skeleton__block">
       <div :style="setBlockSize(60, 18)" class="skeleton__block-item"></div>
 
       <div :style="setBlockSize(60, 30)" class="skeleton__block-item"></div>

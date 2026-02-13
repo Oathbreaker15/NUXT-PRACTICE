@@ -10,11 +10,16 @@ export interface IDeviceTypeOptions {
 export function useDeviceType(options: IDeviceTypeOptions = {}) {
   const { desktopBreakpoint = 1096, tabletBreakpoint = 640, debounceTime = 100 } = options
 
-  const isDesktop = ref(window.innerWidth >= desktopBreakpoint)
-  const isTablet = ref(
-    window.innerWidth < desktopBreakpoint && window.innerWidth >= tabletBreakpoint
-  )
-  const isMobile = ref(window.innerWidth < tabletBreakpoint)
+  const isDesktop = ref(import.meta.client ? window.innerWidth >= desktopBreakpoint : false)
+  const isTablet = ref(import.meta.client ? window.innerWidth < desktopBreakpoint && window.innerWidth >= tabletBreakpoint : false)
+  const isMobile = ref(import.meta.client ? window.innerWidth < tabletBreakpoint : false)
+
+  onMounted(() => window.addEventListener('resize', handleResize))
+  onBeforeUnmount(() => window.removeEventListener('resize', handleResize))
+  // const isTablet = ref(
+  //   window.innerWidth < desktopBreakpoint && window.innerWidth >= tabletBreakpoint
+  // )
+  // const isMobile = ref(window.innerWidth < tabletBreakpoint)
 
   const handleDeviceType = useDebounce(() => {
     isDesktop.value = window.innerWidth >= desktopBreakpoint

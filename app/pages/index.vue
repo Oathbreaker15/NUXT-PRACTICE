@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { FilterPageStore } from '~/store/FilterPage'
 import { storeToRefs } from 'pinia'
+import { useDeviceType } from '~/composables/useDeviceType'
 
 useHead({
   title: 'Products',
@@ -33,89 +34,107 @@ const {
   isFetchingFilters
 } = storeToRefs(store)
 
+const { isDesktop, isTablet, isMobile } = useDeviceType()
+
 const handleInput = useDebounce(searchByQuery, 800)
 </script>
 
 <template>
   <div class="products">
-    <SkeletonFilterPanel
-      v-if="isFetchingFilters"
-      key="skeleton"
-      :filter-items-amount="FILTER_ITEMS_AMOUNT"
-    />
+    <div v-if="isDesktop" class="products__filter-panel">
+      <SkeletonFilterPanel
+        v-if="isFetchingFilters"
+        key="skeleton"
+        :filter-items-amount="FILTER_ITEMS_AMOUNT"
+      />
 
-    <FilterPanel
-      v-else
-      key="content"
-      :filters="filters"
-      @select-filter-value="toggleFilterObj"
-      @toggle-panel-view="togglePanelItemsOpenedState"
-      @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
-      @reset-filters="clearFilterObj"
-    />
-
-    <div v-if="isFetchingProducts">
-      <SkeletonProductSearchAndSortPanel />
-
-      <div class="products__grid">
-        <template v-for="key in actualLimit" :key="key">
-          <SkeletonProduct />
-        </template>
-      </div>
-
-      <SkeletonProductShowOnPage />
-
-      <SkeletonProductMoreBtn />
+      <FilterPanel
+        v-else
+        key="content"
+        :filters="filters"
+        @select-filter-value="toggleFilterObj"
+        @toggle-panel-view="togglePanelItemsOpenedState"
+        @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
+        @reset-filters="clearFilterObj"
+      />
     </div>
 
-    <template v-else>
-      <div v-if="productsPrepared.length">
-        <div class="products__search-and-sort-panel">
-          <BaseInput
-            name="filter-products"
-            label-text="Search in result"
-            placeholder="Min 3 characters"
-            :value="searchInProductsQuery"
-            @input="handleInput"
-            @reset="clearSearchInProductsQuery"
-          />
+    <div class="products__content">
+      <FilterDeviceBar v-if="isTablet">
+        <template #left-item>
+          <FilterDeviceBarBtn icon="filter" text="Filters">
+            <template #default="{ close }">
+              <FilterPanel
+                key="content"
+                :filters="filters"
+                :close-on-device="close"
+                @select-filter-value="toggleFilterObj"
+                @toggle-panel-view="togglePanelItemsOpenedState"
+                @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
+                @reset-filters="clearFilterObj"
+              />
+            </template>
+          </FilterDeviceBarBtn>
+        </template>
+        <template #right-item>
+          <FilterDeviceBarBtn icon="sort" text="Sort" />
+        </template>
+      </FilterDeviceBar>
 
-          <BaseSelect
-            name="sort-products"
-            label-text="Sort by:"
-            :options="sortObj"
-            @select="sortProducts"
-          />
-        </div>
+      <SkeletonProductGridWithSortPanel
+        v-if="isFetchingProducts && !productsPrepared.length"
+        :actual-limit="actualLimit"
+      />
 
-        <div class="products__grid">
-          <template v-for="product in productsPrepared" :key="product.id">
-            <Product :product="product" :search-query="searchInProductsQuery" />
-          </template>
-        </div>
+      <div v-else class="products__content-inner">
+        <template v-if="productsPrepared.length">
+          <div class="products__search-and-sort-panel">
+            <BaseInput
+              name="filter-products"
+              label-text="Search in result"
+              placeholder="Min 3 characters"
+              :value="searchInProductsQuery"
+              @input="handleInput"
+              @reset="clearSearchInProductsQuery"
+            />
 
-        <div class="products__show-on-page-select">
-          <BaseSelect
-            name="show-on-page"
-            label-text="Show on page:"
-            :options="LIMITS_ARR"
-            @select="setActualLimit"
-          />
-        </div>
+            <BaseSelect
+              name="sort-products"
+              label-text="Sort by:"
+              :options="sortObj"
+              @select="sortProducts"
+            />
+          </div>
 
-        <button
-          v-if="totalRemains > 0"
-          type="submit"
-          :disabled="isFetchingProducts"
-          :class="['products__get-more-btn', { loader: isFetchingProducts }]"
-          @click="fetchProducts"
-        >
-          Show more {{ totalRemains }} products
-        </button>
+          <div class="products__grid">
+            <template v-for="product in productsPrepared" :key="product.id">
+              <Product :product="product" :search-query="searchInProductsQuery" />
+            </template>
+          </div>
+
+          <div class="products__show-on-page-select">
+            <BaseSelect
+              name="show-on-page"
+              label-text="Show on page:"
+              :options="LIMITS_ARR"
+              @select="setActualLimit"
+            />
+          </div>
+
+          <button
+            v-if="totalRemains > 0"
+            type="submit"
+            :disabled="isFetchingProducts"
+            :class="['products__get-more-btn', { loader: isFetchingProducts }]"
+            @click="fetchProducts"
+          >
+            Show more {{ totalRemains }} products
+          </button>
+        </template>
+
+        <ProductNothingFound v-else @reset-filters="clearFiltersAndSearchQuery" />
       </div>
-
-      <ProductNothingFound v-else @reset-filters="clearFiltersAndSearchQuery" />
-    </template>
+    </div>
   </div>
 </template>
 
@@ -124,6 +143,9 @@ const handleInput = useDebounce(searchByQuery, 800)
   display: grid;
   grid-template-columns: 304px auto;
   gap: 24px;
+  max-width: 1344px;
+  margin: 0 auto;
+  width: 100%;
 
   .products__search-and-sort-panel {
     margin-bottom: 8px;
@@ -136,7 +158,7 @@ const handleInput = useDebounce(searchByQuery, 800)
     row-gap: 20px;
     width: 100%;
     margin: 0 auto;
-    grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(226px, 1fr));
     margin-bottom: var(--margin-bottom-16);
   }
 
@@ -190,6 +212,17 @@ const handleInput = useDebounce(searchByQuery, 800)
   .products__search-and-sort-panel {
     display: flex;
     justify-content: space-between;
+  }
+
+  @media (max-width: 1095px) {
+    grid-auto-rows: 1fr;
+    grid-template-columns: auto;
+
+    .products__filter-panel {
+      transform: translateX(-304px);
+      max-width: 304px;
+      position: absolute;
+    }
   }
 }
 </style>

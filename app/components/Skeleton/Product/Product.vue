@@ -5,13 +5,13 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
 <template>
   <div class="product-skeleton">
     <div
-      :style="setBlockSize(262, 200)"
+      :style="setBlockSize(200, 200)"
       class="product-skeleton__item product-skeleton__item--image"
     ></div>
 
     <div class="product-skeleton__info">
-      <div :style="setBlockSize(262, 30)" class="product-skeleton__item"></div>
-      <div :style="setBlockSize(140, 30)" class="product-skeleton__item"></div>
+      <div :style="setBlockSize(262, 22)" class="product-skeleton__item"></div>
+      <div :style="setBlockSize(140, 22)" class="product-skeleton__item"></div>
 
       <div class="product-skeleton__info-stars-wrapper">
         <div :style="setBlockSize(100)" class="product-skeleton__item"></div>
@@ -80,7 +80,8 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
   }
 
   .product-skeleton__info-common {
-    margin-top: var(--margin-top-12);
+    margin-top: var(--margin-top-8);
+    margin-bottom: var(--margin-bottom-12);
 
     .product-skeleton__item:nth-child(2),
     .product-skeleton__item:nth-child(3) {
