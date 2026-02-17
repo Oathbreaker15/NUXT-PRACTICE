@@ -14,13 +14,6 @@ export function useDeviceType(options: IDeviceTypeOptions = {}) {
   const isTablet = ref(import.meta.client ? window.innerWidth < desktopBreakpoint && window.innerWidth >= tabletBreakpoint : false)
   const isMobile = ref(import.meta.client ? window.innerWidth < tabletBreakpoint : false)
 
-  onMounted(() => window.addEventListener('resize', handleResize))
-  onBeforeUnmount(() => window.removeEventListener('resize', handleResize))
-  // const isTablet = ref(
-  //   window.innerWidth < desktopBreakpoint && window.innerWidth >= tabletBreakpoint
-  // )
-  // const isMobile = ref(window.innerWidth < tabletBreakpoint)
-
   const handleDeviceType = useDebounce(() => {
     isDesktop.value = window.innerWidth >= desktopBreakpoint
     isTablet.value = window.innerWidth < desktopBreakpoint && window.innerWidth >= tabletBreakpoint

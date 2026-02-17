@@ -12,7 +12,7 @@ const store = FilterPageStore()
 const {
   FILTER_ITEMS_AMOUNT,
   sortProducts,
-  sortObj,
+  sortArr,
   fetchProducts,
   LIMITS_ARR,
   toggleFilterObj,
@@ -28,9 +28,12 @@ const {
   filters,
   productsPrepared,
   actualLimit,
+  currentSortItem,
   searchInProductsQuery,
   totalRemains,
   isFetchingProducts,
+  filterObj,
+  panelItemsOpenedState,
   isFetchingFilters
 } = storeToRefs(store)
 
@@ -42,42 +45,89 @@ const handleInput = useDebounce(searchByQuery, 800)
 <template>
   <div class="products">
     <div v-if="isDesktop" class="products__filter-panel">
-      <SkeletonFilterPanel
-        v-if="isFetchingFilters"
-        key="skeleton"
-        :filter-items-amount="FILTER_ITEMS_AMOUNT"
-      />
+      <SkeletonFilterPanel v-if="isFetchingFilters" :filter-items-amount="FILTER_ITEMS_AMOUNT" />
 
       <FilterPanel
         v-else
-        key="content"
-        :filters="filters"
+        header="Filters"
+        :is-toggleble="true"
+        :is-resetable="true"
         @select-filter-value="toggleFilterObj"
         @toggle-panel-view="togglePanelItemsOpenedState"
         @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
         @reset-filters="clearFilterObj"
-      />
+      >
+        <template v-for="(filter, key) in filters" :key="key">
+          <FilterItemFilter
+            v-if="Array.isArray(filter) && filter.length"
+            :filter="filter"
+            :name="key"
+            :filter-obj="filterObj"
+            :is-panel-opened="!!panelItemsOpenedState[key]"
+            class="filter__content"
+            @select-filter-value="toggleFilterObj"
+            @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
+          />
+        </template>
+      </FilterPanel>
     </div>
 
     <div class="products__content">
-      <FilterDeviceBar v-if="isTablet">
+      <FilterDeviceBar v-if="isTablet || isMobile">
         <template #left-item>
           <FilterDeviceBarBtn icon="filter" text="Filters">
             <template #default="{ close }">
               <FilterPanel
-                key="content"
+                class="filter__content"
+                header="Filters"
+                :is-toggleble="true"
+                :is-resetable="true"
                 :filters="filters"
                 :close-on-device="close"
-                @select-filter-value="toggleFilterObj"
                 @toggle-panel-view="togglePanelItemsOpenedState"
-                @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
                 @reset-filters="clearFilterObj"
-              />
+              >
+                <template v-for="(filter, key) in filters" :key="key">
+                  <FilterItemFilter
+                    v-if="Array.isArray(filter) && filter.length"
+                    :filter="filter"
+                    :name="key"
+                    :filter-obj="filterObj"
+                    :is-panel-opened="!!panelItemsOpenedState[key]"
+                    class="filter__content"
+                    @select-filter-value="toggleFilterObj"
+                    @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
+                  />
+                </template>
+              </FilterPanel>
             </template>
           </FilterDeviceBarBtn>
         </template>
-        <template #right-item>
-          <FilterDeviceBarBtn icon="sort" text="Sort" />
+
+        <template v-if="isMobile" #right-item>
+          <FilterDeviceBarBtn icon="sort" text="Sort">
+            <template #default="{ close }">
+              <FilterPanel
+                class="filter__content"
+                header="Sort by:"
+                :is-toggleble="false"
+                :is-resetable="false"
+                :filters="filters"
+                :close-on-device="close"
+                @toggle-panel-view="togglePanelItemsOpenedState"
+                @reset-filters="clearFilterObj"
+              >
+                <template v-for="(sortItem, i) in sortArr" :key="i">
+                  <SortItem
+                    :option="sortItem"
+                    :model-value="currentSortItem"
+                    class="filter__content"
+                    @select="sortProducts"
+                  />
+                </template>
+              </FilterPanel>
+            </template>
+          </FilterDeviceBarBtn>
         </template>
       </FilterDeviceBar>
 
@@ -99,11 +149,22 @@ const handleInput = useDebounce(searchByQuery, 800)
             />
 
             <BaseSelect
+              v-if="!isMobile"
               name="sort-products"
               label-text="Sort by:"
-              :options="sortObj"
-              @select="sortProducts"
-            />
+              :model-value="currentSortItem"
+            >
+              <template #default="{ select }">
+                <SortItem
+                  v-for="(sortItem, i) in sortArr"
+                  :key="i"
+                  :option="sortItem"
+                  :model-value="currentSortItem"
+                  :select="select"
+                  @select="sortProducts"
+                />
+              </template>
+            </BaseSelect>
           </div>
 
           <div class="products__grid">
@@ -113,12 +174,18 @@ const handleInput = useDebounce(searchByQuery, 800)
           </div>
 
           <div class="products__show-on-page-select">
-            <BaseSelect
-              name="show-on-page"
-              label-text="Show on page:"
-              :options="LIMITS_ARR"
-              @select="setActualLimit"
-            />
+            <BaseSelect name="show-on-page" label-text="Show on page:" :model-value="actualLimit">
+              <template #default="{ select }">
+                <SortItem
+                  v-for="(limit, i) in LIMITS_ARR"
+                  :key="i"
+                  :option="limit"
+                  :model-value="actualLimit"
+                  :select="select"
+                  @select="setActualLimit"
+                />
+              </template>
+            </BaseSelect>
           </div>
 
           <button
@@ -132,7 +199,20 @@ const handleInput = useDebounce(searchByQuery, 800)
           </button>
         </template>
 
-        <ProductNothingFound v-else @reset-filters="clearFiltersAndSearchQuery" />
+        <template v-else>
+          <div class="products__search-and-sort-panel">
+            <BaseInput
+              name="filter-products"
+              label-text="Search in result"
+              placeholder="Min 3 characters"
+              :value="searchInProductsQuery"
+              @input="handleInput"
+              @reset="clearSearchInProductsQuery"
+            />
+          </div>
+
+          <ProductNothingFound @reset-filters="clearFiltersAndSearchQuery" />
+        </template>
       </div>
     </div>
   </div>
@@ -218,10 +298,20 @@ const handleInput = useDebounce(searchByQuery, 800)
     grid-auto-rows: 1fr;
     grid-template-columns: auto;
 
+    .products__content-inner {
+      padding: 0 16px;
+    }
+
     .products__filter-panel {
       transform: translateX(-304px);
       max-width: 304px;
       position: absolute;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .products__content-inner {
+      padding: 0 16px;
     }
   }
 }

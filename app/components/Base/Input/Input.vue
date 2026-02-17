@@ -73,5 +73,9 @@ const emit = defineEmits<{
       border-color: var(--grey-emphasized);
     }
   }
+
+  @media (max-width: 639px) {
+    flex-wrap: wrap;
+  }
 }
 </style>

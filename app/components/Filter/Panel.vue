@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FilterPageStore } from '~/store/FilterPage'
-import type { ProductsFiltersAPIResponse } from '~~/shared/types/Product/API/ProductsFiltersAPIResponse'
+import type { ProductsFiltersAPIResponse } from '~~/shared/types/ProductsFiltersAPIResponse'
 import { useDeviceType } from '#imports'
 
 const emit = defineEmits<{
@@ -10,20 +10,24 @@ const emit = defineEmits<{
   (e: 'toggle-panel-view'): void
 }>()
 
-const props = defineProps<{ filters: ProductsFiltersAPIResponse; closeOnDevice?: () => void }>()
+const props = defineProps<{
+  header: string
+  isToggleble: boolean
+  isResetable: boolean
+  closeOnDevice?: () => void
+}>()
 
 const { isDesktop } = useDeviceType()
 const store = FilterPageStore()
-const { isResetBtnDisabled, filterObj, panelItemsOpenedState, isPanelAllOpened } =
-  storeToRefs(store)
+const { isResetBtnDisabled, isPanelAllOpened } = storeToRefs(store)
 </script>
 
 <template>
   <aside class="filter">
     <div class="filter__title-wrapper">
-      <h2 class="filter__title">Filters</h2>
+      <h2 class="filter__title">{{ header }}</h2>
 
-      <span class="filter__title-toggle" @click="emit('toggle-panel-view')">{{
+      <span v-if="isToggleble" class="filter__title-toggle" @click="emit('toggle-panel-view')">{{
         isPanelAllOpened ? 'Collapse all' : 'Expand all'
       }}</span>
 
@@ -31,20 +35,10 @@ const { isResetBtnDisabled, filterObj, panelItemsOpenedState, isPanelAllOpened }
     </div>
 
     <form class="filter__form">
-      <template v-for="(filter, key) in props.filters" :key="key">
-        <FilterItem
-          v-if="Array.isArray(filter) && filter.length"
-          :filter="filter"
-          :name="key"
-          :filter-obj="filterObj"
-          :is-panel-opened="!!panelItemsOpenedState[key]"
-          class="filter__content"
-          @select-filter-value="(category, value) => emit('select-filter-value', category, value)"
-          @toggle-panel-item-view="(category) => emit('toggle-panel-item-view', category)"
-        />
-      </template>
+      <slot></slot>
 
       <button
+        v-if="isResetable"
         type="reset"
         class="filter__reset-btn"
         :disabled="isResetBtnDisabled"
@@ -92,7 +86,7 @@ const { isResetBtnDisabled, filterObj, panelItemsOpenedState, isPanelAllOpened }
     }
   }
 
-  .filter__content {
+  :deep(.filter__content) {
     padding: 12px;
     &:not(:last-child) {
       border-bottom: 2px solid var(--grey-ultralight-opaque);

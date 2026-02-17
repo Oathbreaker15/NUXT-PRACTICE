@@ -50,7 +50,6 @@ useHead({
     align-items: center;
     gap: 8px;
     padding: 0 16px;
-    position: relative;
   }
 
   .device-bar-btn__icon {
@@ -84,9 +83,21 @@ useHead({
     top: 0;
     z-index: 2;
     transition: 0.4s;
+    left: 0;
 
     &.device-bar-btn__panel--active {
       transform: translateX(0);
+    }
+  }
+
+  @media (max-width: 639px) {
+    .device-bar-btn__panel {
+      max-width: 100%;
+      transform: translateX(-100vw);
+
+      &.device-bar-btn__panel--active {
+        transform: translateX(0);
+      }
     }
   }
 }

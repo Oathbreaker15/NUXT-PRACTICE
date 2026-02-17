@@ -1,2 +1,2 @@
-  const LIMIT_OPTIONS = [8, 16, 32, 64] as const;
+  const LIMIT_OPTIONS = [{ key: 8 }, { key: 16 }, { key: 32 }, { key: 64 }] as const;
   export type LimitValue = typeof LIMIT_OPTIONS[number];

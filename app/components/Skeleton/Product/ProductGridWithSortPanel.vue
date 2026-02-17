@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface IProps {
-  actualLimit: number
+  actualLimit: {key: number}
 }
 
 const props = defineProps<IProps>()
@@ -11,7 +11,7 @@ const props = defineProps<IProps>()
     <SkeletonProductSearchAndSortPanel />
 
     <div class="products__grid">
-      <template v-for="key in actualLimit" :key="key">
+      <template v-for="cnt in actualLimit.key" :key="cnt">
         <SkeletonProduct />
       </template>
     </div>

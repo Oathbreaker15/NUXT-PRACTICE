@@ -1,25 +1,33 @@
-import { defineStore } from 'pinia';
-import { computed } from 'vue';
-
+import { defineStore } from 'pinia'
+import { computed } from 'vue'
 
 export const FilterPageStore = defineStore('FilterPageStore', () => {
-  const FILTER_ITEMS_AMOUNT = 7;
+  const FILTER_ITEMS_AMOUNT = 7
   const products = ref<ProductType[]>([])
   const filters = ref<ProductsFiltersAPIResponse>({})
   const filterObj = ref<ProductsFiltersAPIResponse>({})
-  const sortObj = ref<SortType>({
-    title: 'asc',
-    price: 'desc',
-    rating: 'desc'
-  })
-  const LIMITS_ARR: [8, 16, 32, 64] = [8, 16, 32, 64];
-  const actualLimit = ref<LimitValue>(8)
+  const sortArr = ref<SortType[]>([
+    { key: 'title', order: 'asc' },
+    { key: 'title', order: 'desc' },
+    { key: 'price', order: 'asc' },
+    { key: 'price', order: 'desc' },
+    { key: 'rating', order: 'desc' },
+    { key: 'rating', order: 'asc' }
+  ])
+  const LIMITS_ARR = [
+    { key: 8 },
+    { key: 16 },
+    { key: 32 },
+    { key: 64 }
+  ] as const
+  const actualLimit = ref<LimitValue>({key: 8})
+  const currentSortItem = ref<SortType | undefined>(undefined)
 
   const searchInProductsQuery = ref('')
 
   const panelItemsOpenedState = ref<Record<string, boolean>>({})
-  const isFetchingProducts = ref(true);
-  const isFetchingFilters = ref(true);
+  const isFetchingProducts = ref(true)
+  const isFetchingFilters = ref(true)
   const queryObj = reactive({
     limit: actualLimit,
     skip: 0,
@@ -28,30 +36,29 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
 
   const fetchProducts = async () => {
     try {
-      isFetchingProducts.value = true;
+      isFetchingProducts.value = true
       const dataProducts = await $fetch<ProductsAPIResponse>(`/api/ProductsFetch`, {
         query: {
-          limit: queryObj.limit,
+          limit: queryObj.limit.key,
           skip: queryObj.skip
         }
       })
       if (dataProducts?.products) {
         products.value = [...products.value, ...dataProducts.products]
-        queryObj.total = dataProducts.total;
-        queryObj.skip += +(queryObj.limit);
+        queryObj.total = dataProducts.total
+        queryObj.skip += +queryObj.limit.key
       }
     } catch (e) {
       console.log(e)
     } finally {
-      isFetchingProducts.value = false;
+      isFetchingProducts.value = false
     }
   }
 
   const fetchFilters = async () => {
     try {
-      isFetchingFilters.value = true;
-      const dataProductsFilters =
-        await $fetch<ProductsFiltersAPIResponse>('/api/ProductsFilters')
+      isFetchingFilters.value = true
+      const dataProductsFilters = await $fetch<ProductsFiltersAPIResponse>('/api/ProductsFilters')
       filters.value = { ...dataProductsFilters }
       if (Object.keys(filters.value).length) {
         preparePanelItemsOpenedState()
@@ -59,7 +66,7 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
     } catch (e) {
       console.log(e)
     } finally {
-      isFetchingFilters.value = false;
+      isFetchingFilters.value = false
     }
   }
 
@@ -80,7 +87,10 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
     })
   }
 
-  const toggleFilterObj = (category: keyof ProductsFiltersAPIResponse, filterParam: string): void => {
+  const toggleFilterObj = (
+    category: keyof ProductsFiltersAPIResponse,
+    filterParam: string
+  ): void => {
     if (!filterObj.value[category]) {
       filterObj.value[category] = [filterParam]
     } else {
@@ -98,37 +108,32 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
     }
   }
 
-  const sortProducts = (category: keyof SortType) => {
+  const sortProducts = (category: SortType) => {
     const result = products.value.sort((a, b) => {
-      if (sortObj.value[category] === 'asc') {
-        if (typeof a[category] === 'string') {
-          return a[category].localeCompare(b[category])
+      if (category.order === 'asc') {
+        if (typeof a[category.key] === 'string') {
+          return String(a[category.key]).localeCompare(String(b[category.key]))
         }
 
-        return a[category] - b[category]
+        return +a[category.key] - +b[category.key]
       } else {
-        if (typeof a[category] === 'string') {
-          return b[category].localeCompare(a[category])
+        if (typeof a[category.key] === 'string') {
+          return String(b[category.key]).localeCompare(String(a[category.key]))
         }
 
-        return b[category] - a[category]
+        return +b[category.key] - +a[category.key]
       }
     })
 
-    if (sortObj.value[category] === 'asc') {
-      sortObj.value[category] = 'desc'
-    } else {
-      sortObj.value[category] = 'asc'
-    }
-
+    currentSortItem.value = category
     products.value = result
   }
 
   const searchByQuery = (query: string) => {
-    searchInProductsQuery.value = query;
+    searchInProductsQuery.value = query
   }
 
-  const setActualLimit = async (limit: typeof LIMITS_ARR[number]) => {
+  const setActualLimit = async (limit: (typeof LIMITS_ARR)[number]) => {
     actualLimit.value = limit
   }
 
@@ -146,17 +151,17 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
   }
 
   const filteredProducts = computed(() => {
-    const keys = Object.keys(filterObj.value) as Array<keyof ProductsFiltersAPIResponse>;
+    const keys = Object.keys(filterObj.value) as Array<keyof ProductsFiltersAPIResponse>
 
     return products.value.filter((product) => {
-      return keys.every(key => {
+      return keys.every((key) => {
         if (Array.isArray(product[key])) {
-          return product[key]?.some(filterValue => {
+          return product[key]?.some((filterValue) => {
             return filterObj.value[key]?.includes(filterValue)
           })
         } else {
-          if (filterObj.value[key]?.includes(product[key])) {
-            return true;
+          if (typeof product[key] === 'string' &&filterObj.value[key]?.includes(product[key])) {
+            return true
           }
         }
       })
@@ -164,22 +169,27 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
   })
 
   const searchedByQueryProducts = computed(() => {
-    const query = searchInProductsQuery.value.toLowerCase().trim();
-    if (!query || query.length < 3) return filteredProducts.value;
+    const query = searchInProductsQuery.value.toLowerCase().trim()
+    if (!query || query.length < 3) return filteredProducts.value
 
-    return filteredProducts.value.filter((product) =>
-      product.title.toLowerCase().includes(query) || product.brand?.toLowerCase().includes(query)
-    );
-  });
+    return filteredProducts.value.filter(
+      (product) =>
+        product.title.toLowerCase().includes(query) || product.brand?.toLowerCase().includes(query)
+    )
+  })
 
-  const productsPrepared = computed(() => searchedByQueryProducts.value.length ? searchedByQueryProducts.value : [])
-  const isPanelAllOpened = computed(() => Object.values(panelItemsOpenedState.value).every((item) => !!item))
+  const productsPrepared = computed(() =>
+    searchedByQueryProducts.value.length ? searchedByQueryProducts.value : []
+  )
+  const isPanelAllOpened = computed(() =>
+    Object.values(panelItemsOpenedState.value).every((item) => !!item)
+  )
   const isResetBtnDisabled = computed(() => !Object.keys(filterObj.value).length)
   const totalRemains = computed(() => queryObj.total - queryObj.skip)
 
   const initData = async () => {
-    await fetchFilters();
-    await fetchProducts();
+    await fetchFilters()
+    await fetchProducts()
   }
 
   initData()
@@ -189,12 +199,13 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
     filters,
     filterObj,
     initData,
-    sortObj,
+    sortArr,
     LIMITS_ARR,
     isFetchingProducts,
     isFetchingFilters,
     searchInProductsQuery,
     actualLimit,
+    currentSortItem,
 
     fetchProducts,
     panelItemsOpenedState,

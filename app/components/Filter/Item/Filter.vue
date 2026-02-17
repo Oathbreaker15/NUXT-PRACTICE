@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { CATEGORIES_NAMES } from '~/constants/product/categoriesNames'
 
-type Filter = {
+type IProps = {
   name: keyof ProductsFiltersAPIResponse
   filter: string[]
   filterObj: ProductsFiltersAPIResponse
@@ -13,7 +13,7 @@ const emit = defineEmits<{
   (e: 'toggle-panel-item-view', category: keyof ProductsFiltersAPIResponse): void
 }>()
 
-const props = defineProps<Filter>()
+const props = defineProps<IProps>()
 const isToggled = ref(false)
 
 const isChecked = (value: string) => {
