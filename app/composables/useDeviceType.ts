@@ -1,4 +1,5 @@
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+// composables/useDeviceType.ts
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useDebounce } from './useDebounce'
 
 export interface IDeviceTypeOptions {
@@ -8,24 +9,31 @@ export interface IDeviceTypeOptions {
 }
 
 export function useDeviceType(options: IDeviceTypeOptions = {}) {
-  const { desktopBreakpoint = 1096, tabletBreakpoint = 640, debounceTime = 100 } = options
+  const { 
+    desktopBreakpoint = 1096, 
+    tabletBreakpoint = 640, 
+    debounceTime = 100 
+  } = options
 
-  const isDesktop = ref(import.meta.client ? window.innerWidth >= desktopBreakpoint : false)
-  const isTablet = ref(import.meta.client ? window.innerWidth < desktopBreakpoint && window.innerWidth >= tabletBreakpoint : false)
-  const isMobile = ref(import.meta.client ? window.innerWidth < tabletBreakpoint : false)
+  const windowWidth = ref(0)
 
-  const handleDeviceType = useDebounce(() => {
-    isDesktop.value = window.innerWidth >= desktopBreakpoint
-    isTablet.value = window.innerWidth < desktopBreakpoint && window.innerWidth >= tabletBreakpoint
-    isMobile.value = window.innerWidth < tabletBreakpoint
-  }, debounceTime)
+  const isMobile = computed(() => windowWidth.value > 0 && windowWidth.value < tabletBreakpoint)
+  const isTablet = computed(() => windowWidth.value >= tabletBreakpoint && windowWidth.value < desktopBreakpoint)
+  const isDesktop = computed(() => windowWidth.value >= desktopBreakpoint)
+
+  const updateWidth = () => {
+    windowWidth.value = window.innerWidth
+  }
+
+  const handleResize = useDebounce(updateWidth, debounceTime)
 
   onMounted(() => {
-    window.addEventListener('resize', handleDeviceType)
+    updateWidth() 
+    window.addEventListener('resize', handleResize)
   })
 
   onBeforeUnmount(() => {
-    window.removeEventListener('resize', handleDeviceType)
+    window.removeEventListener('resize', handleResize)
   })
 
   return {
