@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed } from 'vue'
 
 export const FilterPageStore = defineStore('FilterPageStore', () => {
+  const route = useRoute()
   const FILTER_ITEMS_AMOUNT = 7
   const products = ref<ProductType[]>([])
   const filters = ref<ProductsFiltersAPIResponse>({})
@@ -14,13 +15,8 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
     { key: 'rating', order: 'desc' },
     { key: 'rating', order: 'asc' }
   ])
-  const LIMITS_ARR = [
-    { key: 8 },
-    { key: 16 },
-    { key: 32 },
-    { key: 64 }
-  ] as const
-  const actualLimit = ref<LimitValue>({key: 8})
+  const LIMITS_ARR = [{ key: 8 }, { key: 16 }, { key: 32 }, { key: 64 }] as const
+  const actualLimit = ref<LimitValue>({ key: 8 })
   const currentSortItem = ref<SortType | undefined>(undefined)
 
   const searchInProductsQuery = ref('')
@@ -34,14 +30,45 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
     total: 0
   })
 
-  const fetchProducts = async () => {
+  const loadProducts = async () => {
+    products.value = []
+    queryObj.skip = 0
+
+    const searchQuery = route.query.q as string
+
+    if (searchQuery) {
+      await fetchProductsSearch(searchQuery)
+    } else {
+      await fetchProductsAll()
+    }
+  }
+
+  const fetchProductsAll = async () => {
     try {
       isFetchingProducts.value = true
-      const dataProducts = await $fetch<ProductsAPIResponse>(`/api/ProductsFetch`, {
+      const dataProducts = await $fetch<ProductsAPIResponse>(`/api/ProductsFetchAll`, {
         query: {
           limit: queryObj.limit.key,
           skip: queryObj.skip
         }
+      })
+      if (dataProducts?.products) {
+        products.value = [...products.value, ...dataProducts.products]
+        queryObj.total = dataProducts.total
+        queryObj.skip += +queryObj.limit.key
+      }
+    } catch (e) {
+      console.log(e)
+    } finally {
+      isFetchingProducts.value = false
+    }
+  }
+
+  const fetchProductsSearch = async (q: string) => {
+    try {
+      isFetchingProducts.value = true
+      const dataProducts = await $fetch<ProductsAPIResponse>(`/api/ProductsSearch`, {
+        query: { q }
       })
       if (dataProducts?.products) {
         products.value = [...products.value, ...dataProducts.products]
@@ -160,7 +187,7 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
             return filterObj.value[key]?.includes(filterValue)
           })
         } else {
-          if (typeof product[key] === 'string' &&filterObj.value[key]?.includes(product[key])) {
+          if (typeof product[key] === 'string' && filterObj.value[key]?.includes(product[key])) {
             return true
           }
         }
@@ -189,10 +216,10 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
 
   const initData = async () => {
     await fetchFilters()
-    await fetchProducts()
+    await loadProducts()
   }
 
-  initData()
+  // initData()
 
   return {
     FILTER_ITEMS_AMOUNT,
@@ -207,7 +234,7 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
     actualLimit,
     currentSortItem,
 
-    fetchProducts,
+    fetchProductsAll,
     panelItemsOpenedState,
     togglePanelItemsOpenedState,
     togglePanelItemsOpenedStateItem,

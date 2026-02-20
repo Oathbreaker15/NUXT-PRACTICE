@@ -3,39 +3,56 @@ interface IProps {
   name: string
   placeholder: string
   labelText?: string
-  value?: string
   isVertical?: boolean
+  btnText?: string
+  width: number
+  height: number
 }
 
 const props = defineProps<IProps>()
+const model = defineModel<string>({ required: true })
 
 const emit = defineEmits<{
-  (e: 'input', value: string): void
+  (e: 'update:model', value: string): void
+  (e: 'submit', value: string): void
   (e: 'reset'): void
 }>()
 </script>
 
 <template>
-  <div :class="['base-input', { 'base-input--vertical': isVertical }]">
+  <form
+    :class="['base-input', { 'base-input--vertical': isVertical }]"
+    @submit.prevent="emit('submit', model)"
+  >
     <label v-if="labelText" :for="name" class="base-input__label">
       {{ labelText }}
     </label>
 
-    <div class="base-input__input-wrapper">
+    <div
+      :style="`max-width: ${width}px; max-height: ${height}px;`"
+      class="base-input__input-wrapper"
+    >
       <input
+        v-model="model"
         :id="name"
         :name="name"
         type="text"
         inputmode="text"
         :placeholder="placeholder"
-        :value="value"
         class="base-input__input"
-        @input="(e) => emit('input', (e.target as HTMLSelectElement).value)"
       />
 
-      <span v-if="value?.length" class="base-input__clear" @click="emit('reset')"></span>
+      <span v-if="model.length" class="base-input__clear" @click="model = ''"></span>
+
+      <button
+        v-if="!!btnText"
+        class="base-input__btn"
+        type="submit"
+      >
+        {{ btnText }}
+      </button>
     </div>
-  </div>
+  </form>
 </template>
 
 <style scoped lang="scss">
@@ -44,6 +61,13 @@ const emit = defineEmits<{
 .base-input {
   .base-input__input-wrapper {
     position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .base-input__input {
+    width: 100%;
+    height: 100%;
   }
 
   .base-input__clear {
@@ -61,6 +85,24 @@ const emit = defineEmits<{
     &:active {
       background-position-y: -24px;
     }
+  }
+
+  .base-input__btn {
+    position: absolute;
+    right: 0;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    height: 40px;
+    width: 80px;
+    color: var(--white);
+    border: none;
+    background: var(--black-light);
+    border-radius: 0 4px 4px 0;
+    height: 100%;
+    font-weight: bold;
+    cursor: pointer;
+
+    @include hover-active-brand-background-color();
   }
 
   &:focus-within {

@@ -9,6 +9,30 @@
   }
 }
 
+@mixin hover-active-brand-background-color {
+  @media (hover: hover) {
+    &:hover {
+      background: var(--brand-light);
+    }
+  }
+
+  &:active {
+    background: var(--brand-emphasized);
+  }
+}
+
+@mixin hover-active-brand-text-color {
+  @media (hover: hover) {
+    &:hover {
+      color: var(--brand-light);
+    }
+  }
+
+  &:active {
+    color: var(--brand-emphasized);
+  }
+}
+
 @mixin base-input($name) {
   .base-#{$name} {
     display: flex;
@@ -25,7 +49,7 @@
   .base-#{$name}__input {
     border-radius: 4px;
     border: 2px solid var(--grey-light);
-    padding: 4px;
+    padding: 4px 8px;
 
     @media (hover: hover) {
       &:hover {
