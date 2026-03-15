@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FilterPageStore } from '~/store/FilterPage'
+import { FilterPageStore } from '~/store/useFilterPageStore'
 import type { ProductsFiltersAPIResponse } from '~~/shared/types/ProductsFiltersAPIResponse'
 import { useDeviceType } from '#imports'
 
@@ -108,7 +108,7 @@ const { isResetBtnDisabled, isPanelAllOpened } = storeToRefs(store)
     }
   }
 
-  @media (max-width: 1095px) {
+  @media (max-width: $tablet-breakpoint) {
     .filter__form {
       height: calc(100vh - 46px);
       background: var(--grey-light-opaque);

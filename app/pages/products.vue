@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FilterPageStore } from '~/store/FilterPage'
+import { FilterPageStore } from '~/store/useFilterPageStore'
 import { storeToRefs } from 'pinia'
 import { useDeviceType } from '~/composables/useDeviceType'
 
@@ -10,10 +10,10 @@ useHead({
 
 const store = FilterPageStore()
 const {
-  FILTER_ITEMS_AMOUNT,
+  skeletonCount,
   sortProducts,
   sortArr,
-  fetchProductsAll,
+  loadProducts,
   LIMITS_ARR,
   toggleFilterObj,
   togglePanelItemsOpenedState,
@@ -29,16 +29,19 @@ const {
   filters,
   productsPrepared,
   actualLimit,
-  currentSortItem,
+  searchQuery,
+  currentSortType,
   searchInProductsQuery,
   totalRemains,
   isFetchingProducts,
-  filterObj,
+  activeFilters,
   panelItemsOpenedState,
   isFetchingFilters
 } = storeToRefs(store)
 
-const { isDesktop, isTablet, isMobile } = useDeviceType()
+const { isDesktop, isMobile } = useDeviceType()
+
+const smallestLimit = LIMITS_ARR[0].key
 
 watch(searchInProductsQuery, () => useDebounce(searchByQuery, 800))
 
@@ -48,93 +51,103 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="products">
-    <div v-if="isDesktop" class="products__filter-panel">
-      <SkeletonFilterPanel v-if="isFetchingFilters" :filter-items-amount="FILTER_ITEMS_AMOUNT" />
+  <h1 v-if="!!searchQuery" class="search-result-header">
+    Search results for <span class="search-result-header__query">{{ searchQuery }}</span>
+  </h1>
 
-      <FilterPanel
-        v-else
-        header="Filters"
-        :is-toggleble="true"
-        :is-resetable="true"
-        @select-filter-value="toggleFilterObj"
-        @toggle-panel-view="togglePanelItemsOpenedState"
-        @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
-        @reset-filters="clearFilterObj"
-      >
-        <template v-for="(filter, key) in filters" :key="key">
-          <FilterItemFilter
-            v-if="Array.isArray(filter) && filter.length"
-            :filter="filter"
-            :name="key"
-            :filter-obj="filterObj"
-            :is-panel-opened="!!panelItemsOpenedState[key]"
-            class="filter__content"
-            @select-filter-value="toggleFilterObj"
-            @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
-          />
-        </template>
-      </FilterPanel>
+  <div class="products">
+    <div class="products__filter-panel">
+      <template v-if="isDesktop">
+        <SkeletonFilterPanel v-if="isFetchingFilters" :filter-items-amount="skeletonCount" />
+
+        <FilterPanel
+          v-else
+          header="Filters"
+          :is-toggleble="true"
+          :is-resetable="true"
+          @select-filter-value="toggleFilterObj"
+          @toggle-panel-view="togglePanelItemsOpenedState"
+          @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
+          @reset-filters="clearFilterObj"
+        >
+          <template v-for="(filter, key) in filters" :key="key">
+            <FilterItemFilter
+              v-if="Array.isArray(filter) && filter.length"
+              :filter="filter"
+              :name="key"
+              :active-filters="activeFilters"
+              :is-panel-opened="!!panelItemsOpenedState[key]"
+              class="filter__content"
+              @select-filter-value="toggleFilterObj"
+              @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
+            />
+          </template>
+        </FilterPanel>
+      </template>
     </div>
 
     <div class="products__content">
-      <FilterDeviceBar v-if="isTablet || isMobile">
-        <template #left-item>
-          <FilterDeviceBarBtn icon="filter" text="Filters">
-            <template #default="{ close }">
-              <FilterPanel
-                class="filter__content"
-                header="Filters"
-                :is-toggleble="true"
-                :is-resetable="true"
-                :filters="filters"
-                :close-on-device="close"
-                @toggle-panel-view="togglePanelItemsOpenedState"
-                @reset-filters="clearFilterObj"
-              >
-                <template v-for="(filter, key) in filters" :key="key">
-                  <FilterItemFilter
-                    v-if="Array.isArray(filter) && filter.length"
-                    :filter="filter"
-                    :name="key"
-                    :filter-obj="filterObj"
-                    :is-panel-opened="!!panelItemsOpenedState[key]"
-                    class="filter__content"
-                    @select-filter-value="toggleFilterObj"
-                    @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
-                  />
-                </template>
-              </FilterPanel>
-            </template>
-          </FilterDeviceBarBtn>
-        </template>
+      <template v-if="!isDesktop">
+        <SkeletonFilterPanelDevice v-if="isFetchingFilters" />
 
-        <template v-if="isMobile" #right-item>
-          <FilterDeviceBarBtn icon="sort" text="Sort">
-            <template #default="{ close }">
-              <FilterPanel
-                class="filter__content"
-                header="Sort by:"
-                :is-toggleble="false"
-                :is-resetable="false"
-                :filters="filters"
-                :close-on-device="close"
-                @toggle-panel-view="togglePanelItemsOpenedState"
-                @reset-filters="clearFilterObj"
-              >
-                <template v-for="(sortItem, i) in sortArr" :key="i">
-                  <SortItem
-                    :option="sortItem"
-                    :model-value="currentSortItem"
-                    class="filter__content"
-                    @select="sortProducts"
-                  />
-                </template>
-              </FilterPanel>
-            </template>
-          </FilterDeviceBarBtn>
-        </template>
-      </FilterDeviceBar>
+        <FilterDeviceBar v-else>
+          <template #left-item>
+            <FilterDeviceBarBtn icon="filter" text="Filters">
+              <template #default="{ close }">
+                <FilterPanel
+                  class="filter__content"
+                  header="Filters"
+                  :is-toggleble="true"
+                  :is-resetable="true"
+                  :filters="filters"
+                  :close-on-device="close"
+                  @toggle-panel-view="togglePanelItemsOpenedState"
+                  @reset-filters="clearFilterObj"
+                >
+                  <template v-for="(filter, key) in filters" :key="key">
+                    <FilterItemFilter
+                      v-if="Array.isArray(filter) && filter.length"
+                      :filter="filter"
+                      :name="key"
+                      :active-filters="activeFilters"
+                      :is-panel-opened="!!panelItemsOpenedState[key]"
+                      class="filter__content"
+                      @select-filter-value="toggleFilterObj"
+                      @toggle-panel-item-view="togglePanelItemsOpenedStateItem"
+                    />
+                  </template>
+                </FilterPanel>
+              </template>
+            </FilterDeviceBarBtn>
+          </template>
+
+          <template v-if="isMobile" #right-item>
+            <FilterDeviceBarBtn icon="sort" text="Sort">
+              <template #default="{ close }">
+                <FilterPanel
+                  class="filter__content"
+                  header="Sort by:"
+                  :is-toggleble="false"
+                  :is-resetable="false"
+                  :filters="filters"
+                  :close-on-device="close"
+                  @toggle-panel-view="togglePanelItemsOpenedState"
+                  @reset-filters="clearFilterObj"
+                >
+                  <template v-for="(sortItem, i) in sortArr" :key="i">
+                    <SortItem
+                      :option="sortItem"
+                      :model-value="currentSortType"
+                      class="filter__content"
+                      @select="sortProducts"
+                    />
+                  </template>
+                </FilterPanel>
+              </template>
+            </FilterDeviceBarBtn>
+          </template>
+        </FilterDeviceBar>
+      </template>
 
       <SkeletonProductGridWithSortPanel
         v-if="isFetchingProducts && !productsPrepared.length"
@@ -158,14 +171,14 @@ onMounted(() => {
               v-if="!isMobile"
               name="sort-products"
               label-text="Sort by:"
-              :model-value="currentSortItem"
+              :model-value="currentSortType"
             >
               <template #default="{ select }">
                 <SortItem
                   v-for="(sortItem, i) in sortArr"
                   :key="i"
                   :option="sortItem"
-                  :model-value="currentSortItem"
+                  :model-value="currentSortType"
                   :select="select"
                   @select="sortProducts"
                 />
@@ -173,14 +186,24 @@ onMounted(() => {
             </BaseSelect>
           </div>
 
-          <div class="products__grid">
+          <div
+            :class="[
+              'products__grid',
+              { 'products__grid--no-margin': productsPrepared.length < smallestLimit }
+            ]"
+          >
             <template v-for="product in productsPrepared" :key="product.id">
               <Product :product="product" :search-query="searchInProductsQuery" />
             </template>
           </div>
 
           <div class="products__show-on-page-select">
-            <BaseSelect name="show-on-page" label-text="Show on page:" :model-value="actualLimit">
+            <BaseSelect
+              v-if="productsPrepared.length >= smallestLimit"
+              name="show-on-page"
+              label-text="Show on page:"
+              :model-value="actualLimit"
+            >
               <template #default="{ select }">
                 <SortItem
                   v-for="(limit, i) in LIMITS_ARR"
@@ -199,7 +222,7 @@ onMounted(() => {
             type="submit"
             :disabled="isFetchingProducts"
             :class="['products__get-more-btn', { loader: isFetchingProducts }]"
-            @click="fetchProductsAll"
+            @click="loadProducts(false)"
           >
             Show more {{ totalRemains }} products
           </button>
@@ -226,13 +249,23 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
+.search-result-header {
+  margin-bottom: var(--space-24);
+
+  .search-result-header__query {
+    color: var(--brand);
+  }
+}
+
 .products {
   display: grid;
   grid-template-columns: 304px auto;
   gap: 24px;
-  max-width: 1344px;
-  margin: 0 auto;
-  width: 100%;
+
+  .products__filter-panel {
+    background: var(--grey-light-opaque);
+    border-radius: 4px;
+  }
 
   .products__search-and-sort-panel {
     margin-bottom: 8px;
@@ -246,7 +279,11 @@ onMounted(() => {
     width: 100%;
     margin: 0 auto;
     grid-template-columns: repeat(auto-fill, minmax(226px, 1fr));
-    margin-bottom: var(--margin-bottom-16);
+    margin-bottom: var(--space-16);
+
+    &.products__grid--no-margin {
+      margin: 0;
+    }
   }
 
   .products__get-more-btn {
@@ -259,7 +296,7 @@ onMounted(() => {
     border-radius: 8px;
     font-weight: bold;
     font-size: 20px;
-    margin-top: var(--margin-top-16);
+    margin-top: var(--space-16);
     cursor: pointer;
 
     @include hover-active-opacity(0.6);
@@ -299,24 +336,14 @@ onMounted(() => {
     justify-content: space-between;
   }
 
-  @media (max-width: 1095px) {
+  @media (max-width: $tablet-breakpoint) {
     grid-auto-rows: 1fr;
     grid-template-columns: auto;
-
-    .products__content-inner {
-      padding: 0 16px;
-    }
 
     .products__filter-panel {
       transform: translateX(-304px);
       max-width: 304px;
       position: absolute;
-    }
-  }
-
-  @media (max-width: 639px) {
-    .products__content-inner {
-      padding: 0 16px;
     }
   }
 }

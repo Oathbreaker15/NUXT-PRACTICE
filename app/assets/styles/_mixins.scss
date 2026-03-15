@@ -1,4 +1,6 @@
 @mixin hover-active-opacity($opacity: 0.6) {
+  transition: 0.2s;
+
   @media (hover: hover) {
     &:hover {
       opacity: $opacity;
@@ -10,6 +12,8 @@
 }
 
 @mixin hover-active-brand-background-color {
+  transition: 0.2s;
+
   @media (hover: hover) {
     &:hover {
       background: var(--brand-light);
@@ -22,6 +26,8 @@
 }
 
 @mixin hover-active-brand-text-color {
+  transition: 0.2s;
+
   @media (hover: hover) {
     &:hover {
       color: var(--brand-light);
@@ -52,11 +58,26 @@
     padding: 4px 8px;
 
     @media (hover: hover) {
+      transition: 0.2s;
       &:hover {
         background: var(--grey-ultralight);
       }
     }
   }
+}
+
+@mixin skeleton-block-group {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+@mixin skeleton-block-group-column {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
 }
 
 @mixin skeleton-block {

@@ -48,7 +48,7 @@ const isOptionActive = (option: T) => {
   background: transparent;
   padding: 8px 12px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.2s;
 
   &--active {
     font-weight: bold;

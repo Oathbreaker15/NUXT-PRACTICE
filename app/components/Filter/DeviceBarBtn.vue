@@ -49,7 +49,6 @@ useHead({
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 0 16px;
   }
 
   .device-bar-btn__icon {
@@ -82,17 +81,18 @@ useHead({
     position: absolute;
     top: 0;
     z-index: 2;
-    transition: 0.4s;
-    left: 0;
+    transition: 0.2s;
+    left: -16px;
 
     &.device-bar-btn__panel--active {
       transform: translateX(0);
     }
   }
 
-  @media (max-width: 639px) {
+  @media (max-width: $mobile-breakpoint) {
     .device-bar-btn__panel {
-      max-width: 100%;
+      max-width: none;
+      width: 100vw;
       transform: translateX(-100vw);
 
       &.device-bar-btn__panel--active {

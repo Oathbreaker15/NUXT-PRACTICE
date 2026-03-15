@@ -5,12 +5,34 @@ interface IProps {
   labelText?: string
   isVertical?: boolean
   btnText?: string
-  width: number
-  height: number
+  size?: 'sm' | 'md' | 'lg' | 'full'
+  customWidth?: string
+  customHeight?: string
+  fullWidthMobile?: boolean
 }
 
-const props = defineProps<IProps>()
+const props = withDefaults(defineProps<IProps>(), {
+  fullWidthMobile: true
+})
+
 const model = defineModel<string>({ required: true })
+
+const sizeMap = {
+  sm: { width: '200px', height: '32px' },
+  md: { width: '320px', height: '40px' },
+  lg: { width: '100%', height: '48px' },
+  full: { width: '100%', height: '100%' }
+}
+
+const inputSize = computed(() => {
+  if (props.customWidth || props.customHeight) {
+    return {
+      width: props.customWidth || '100%',
+      height: props.customHeight || '40px'
+    }
+  }
+  return sizeMap[props.size || 'md']
+})
 
 const emit = defineEmits<{
   (e: 'update:model', value: string): void
@@ -21,7 +43,11 @@ const emit = defineEmits<{
 
 <template>
   <form
-    :class="['base-input', { 'base-input--vertical': isVertical }]"
+    :class="[
+      'base-input',
+      { 'base-input--vertical': isVertical },
+      { 'base-input--full-mobile': fullWidthMobile }
+    ]"
     @submit.prevent="emit('submit', model)"
   >
     <label v-if="labelText" :for="name" class="base-input__label">
@@ -29,7 +55,10 @@ const emit = defineEmits<{
     </label>
 
     <div
-      :style="`max-width: ${width}px; max-height: ${height}px;`"
+      :style="{
+        '--input-width': `${inputSize.width}`,
+        '--input-height': `${inputSize.height}`
+      }"
       class="base-input__input-wrapper"
     >
       <input
@@ -44,11 +73,7 @@ const emit = defineEmits<{
 
       <span v-if="model.length" class="base-input__clear" @click="model = ''"></span>
 
-      <button
-        v-if="!!btnText"
-        class="base-input__btn"
-        type="submit"
-      >
+      <button v-if="!!btnText" class="base-input__btn" type="submit">
         {{ btnText }}
       </button>
     </div>
@@ -63,6 +88,12 @@ const emit = defineEmits<{
     position: relative;
     width: 100%;
     height: 100%;
+    max-width: var(--input-width);
+    max-height: var(--input-height);
+  }
+
+  .base-input__label {
+    flex-shrink: 0;
   }
 
   .base-input__input {
@@ -116,8 +147,15 @@ const emit = defineEmits<{
     }
   }
 
-  @media (max-width: 639px) {
+  @media (max-width: $mobile-breakpoint) {
     flex-wrap: wrap;
+  }
+
+  &--full-mobile {
+    @media (max-width: $mobile-breakpoint) {
+      width: 100%;
+      height: 100%;
+    }
   }
 }
 </style>

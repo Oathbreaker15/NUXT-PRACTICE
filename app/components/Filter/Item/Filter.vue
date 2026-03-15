@@ -4,7 +4,7 @@ import { CATEGORIES_NAMES } from '~/constants/product/categoriesNames'
 type IProps = {
   name: keyof ProductsFiltersAPIResponse
   filter: string[]
-  filterObj: ProductsFiltersAPIResponse
+  activeFilters: ProductsFiltersAPIResponse
   isPanelOpened: boolean
 }
 
@@ -17,7 +17,7 @@ const props = defineProps<IProps>()
 const isToggled = ref(false)
 
 const isChecked = (value: string) => {
-  const selected = props.filterObj[props.name]
+  const selected = props.activeFilters[props.name]
   return Array.isArray(selected) && selected.includes(value)
 }
 
@@ -151,7 +151,7 @@ const toggleItemVisibility = (category: keyof ProductsFiltersAPIResponse) => {
 
   .expand-enter-active,
   .expand-leave-active {
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     overflow: hidden;
   }
 }

@@ -15,68 +15,85 @@ const handleImageError = () => {
 }
 const availabilityStatusClass = computed(() => {
   if (props.product.availabilityStatus === 'In Stock') {
-    return 'product__info-availability_in-stock'
+    return 'product__availability_in-stock'
   } else if (props.product.availabilityStatus === 'Low Stock') {
-    return 'product__info-availability_low-stock'
+    return 'product__availability_low-stock'
   } else {
-    return 'product__info-availability_out-of-stock'
+    return 'product__availability_out-of-stock'
   }
 })
+
+const addToCart = () => {
+  alert('there is no cart yet hehe')
+}
 </script>
 
 <template>
   <article class="product">
-    <NuxtImg
-      class="product__image"
-      :src="currentImage"
-      :alt="`Image for ${props.product.title} product`"
-      loading="lazy"
-      :placeholder="fallbackProductImg"
-      width="200px"
-      height="200px"
-      @error="handleImageError"
-    />
+    <div class="product__inner">
+      <div class="product__image-wrapper">
+        <div class="product__image-stars-wrapper">
+          <div class="product__image-stars"></div>
 
-    <section class="product__info">
-      <h2
-        class="product__info-title"
-        v-html="highlightSubstring(props.product.title, searchQuery)"
-      ></h2>
-
-      <div class="product__info-stars-wrapper">
-        <div class="product__info-stars">
-          <div
-            v-if="props.product.rating"
-            :style="`width: ${20 * props.product.rating}%;`"
-            class="product__info-stars-filled"
-          ></div>
+          <div class="product__image-rating">{{ props.product.rating }}</div>
         </div>
-        <div class="product__info-reviews-amount">({{ props.product.reviews.length }})</div>
-      </div>
 
-      <p class="product__info-sku">{{ props.product.sku }}</p>
+        <NuxtImg
+          class="product__image"
+          :src="currentImage"
+          :alt="`Image for ${props.product.title} product`"
+          loading="lazy"
+          :placeholder="fallbackProductImg"
+          width="200px"
+          height="200px"
+          @error="handleImageError"
+        />
 
-      <div class="product__info-common">
-        <p v-if="props.product.brand" class="product__info-common-brand">
-          Brand: <b>{{ props.product.brand }}</b>
-        </p>
-        <p class="product__info-common-category">
-          Category: <b>{{ props.product.category }}</b>
-        </p>
-        <p class="product__info-common-shipping">
-          Shipping Information: <b>{{ props.product.shippingInformation }}</b>
-        </p>
-      </div>
-
-      <div class="product__info-price-and-availability">
-        <p class="product__info-price">
-          Price: <b>{{ props.product.price }}</b>
-        </p>
-        <p :class="availabilityStatusClass">
+        <p :class="['product__availability', availabilityStatusClass]">
           {{ props.product.availabilityStatus }}: {{ props.product.stock }}
         </p>
       </div>
-    </section>
+
+      <section class="product__info">
+        <h2
+          class="product__info-title"
+          v-html="highlightSubstring(props.product.title, searchQuery)"
+        ></h2>
+
+        <div class="product__info-hideable">
+          <div class="product__info-stars-wrapper">
+            <div class="product__info-stars">
+              <div
+                v-if="props.product.rating"
+                :style="`width: ${20 * props.product.rating}%;`"
+                class="product__info-stars-filled"
+              ></div>
+            </div>
+            <div class="product__info-reviews-amount">({{ props.product.reviews.length }})</div>
+          </div>
+
+          <p class="product__info-sku">{{ props.product.sku }}</p>
+
+          <div class="product__info-common">
+            <p v-if="props.product.brand" class="product__info-common-brand">
+              Brand: <b>{{ props.product.brand }}</b>
+            </p>
+            <p class="product__info-common-category">
+              Category: <b>{{ props.product.category }}</b>
+            </p>
+            <p class="product__info-common-shipping">
+              {{ props.product.shippingInformation }}
+            </p>
+          </div>
+        </div>
+
+        <p class="product__info-price">
+          Price: <b>{{ props.product.price }}</b>
+        </p>
+      </section>
+
+      <button class="product__add-to-cart" @click="addToCart">Add to cart</button>
+    </div>
   </article>
 </template>
 
@@ -84,11 +101,20 @@ const availabilityStatusClass = computed(() => {
 .product {
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
-  border-radius: 12px;
-  border: 2px solid var(--grey-light);
-  padding: 14px;
+  position: relative;
   cursor: pointer;
+  min-height: 350px;
+
+  .product__inner {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 14px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    border: 2px solid var(--grey-light);
+  }
 
   &:has(.product__info-availability_out-of-stock) {
     opacity: 0.8;
@@ -96,13 +122,74 @@ const availabilityStatusClass = computed(() => {
   }
 
   @media (hover: hover) {
-    &:hover {
+    &:hover .product__inner {
       border-color: var(--grey-emphasized);
       box-shadow: 0 16px 24px 0 var(--grey);
     }
   }
 
-  &__image {
+  .product__image-wrapper {
+    position: relative;
+
+    .product__image-stars-wrapper {
+      position: absolute;
+      top: 0;
+      left: -4px;
+      display: flex;
+      gap: 4px;
+
+      .product__image-stars {
+        position: relative;
+        top: -1px;
+        width: 22px;
+        height: 16px;
+        background: url('/imgs/product/stars.svg') no-repeat 0 0;
+      }
+
+      .product__image-rating {
+        font-weight: bold;
+      }
+    }
+
+    .product__availability {
+      position: absolute;
+      top: 0;
+      right: -4px;
+
+      &.product__availability_in-stock {
+        flex-shrink: 0;
+        color: var(--green);
+      }
+
+      &.product__availability_low-stock {
+        flex-shrink: 0;
+        color: var(--brand-light);
+      }
+
+      &.product__availability_out-of-stock {
+        flex-shrink: 0;
+        color: var(--red);
+      }
+    }
+  }
+
+  .product__add-to-cart {
+    border: none;
+    outline: none;
+    box-sizing: border-box;
+    background-color: var(--black-light);
+    color: var(--white);
+    border-radius: 8px;
+    height: 32px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: var(--space-16);
+    flex-shrink: 0;
+
+    @include hover-active-brand-background-color();
+  }
+
+  .product__image {
     width: 100%;
     max-height: 200px;
     margin-bottom: auto;
@@ -118,81 +205,92 @@ const availabilityStatusClass = computed(() => {
       background: var(--brand-light);
     }
 
-    &-title {
-      font-size: 20px;
+    .product__info-title {
+      font-size: 16px;
+      line-height: 16px;
       font-weight: 700;
       color: var(--black);
+      margin-bottom: 8px;
     }
 
-    &-sku {
-      margin-top: var(--margin-top-8);
+    .product__info-sku {
+      margin-top: var(--space-4);
       color: var(--dark-grey-opaque);
     }
 
-    &-stars,
-    &-stars-filled {
+    .product__info-stars,
+    .product__info-stars-filled {
       width: 100px;
-      height: 16px;
+      height: 15px;
     }
 
-    &-stars-wrapper {
+    .product__info-stars-wrapper {
       display: flex;
       align-items: center;
-      margin-top: var(--margin-top-4);
+      margin-top: var(--space-4);
     }
 
-    &-stars {
+    .product__info-stars {
       background: url('/imgs/product/stars.svg') no-repeat 0 -16px;
       background-size: cover;
       margin-left: -5px;
     }
 
-    &-stars-filled {
+    .product__info-stars-filled {
       display: block;
       background: url('/imgs/product/stars.svg') repeat-x 0 -1px;
     }
 
-    &-common {
+    .product__info-common {
       color: var(--dark-grey);
-      margin-top: var(--margin-top-8);
-      margin-bottom: var(--margin-bottom-12);
+      margin-top: var(--space-8);
+      margin-bottom: var(--space-12);
+      font-size: 13px;
 
       > *:not(p:first-of-type) {
-        margin-top: var(--margin-top-4);
+        margin-top: var(--space-4);
       }
 
       b {
         color: var(--black);
       }
+
+      .product__info-common-shipping {
+        font-weight: bold;
+      }
     }
 
-    &-price {
+    .product__info-price {
       color: var(--dark-grey);
+      flex-shrink: 0;
+      margin-top: auto;
 
       b {
         color: var(--black);
         font-size: 20px;
       }
     }
+  }
 
-    &-price-and-availability {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-top: auto;
+  @media (min-width: $tablet-breakpoint) {
+    .product__info-hideable {
+      display: none;
     }
 
-    &-availability_in-stock {
-      color: var(--green);
-    }
+    @media (hover: hover) {
+      &:hover {
+        .product__inner {
+          position: absolute;
+          min-height: 350px;
+          z-index: 2;
+          height: auto;
+          background: var(--white);
 
-    &-availability_low-stock {
-      color: var(--brand-light);
-    }
-
-    &-availability_out-of-stock {
-      color: var(--red);
+          .product__info-hideable {
+            display: block;
+          }
+        }
+      }
     }
   }
 }

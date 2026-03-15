@@ -4,16 +4,28 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
 
 <template>
   <div class="products__search-and-sort-panel">
-    <div :style="setBlockSize(307, 30)" class="skeleton__block">
-      <div :style="setBlockSize(120, 18)" class="skeleton__block-item"></div>
+    <div :style="setBlockSize(332, 30)" class="skeleton__block skeleton__block--hide-on-mob">
+      <div :style="setBlockSize(112, 18)" class="skeleton__block-item"></div>
 
-      <div :style="setBlockSize(207, 30)" class="skeleton__block-item"></div>
+      <div :style="setBlockSize(202, 35)" class="skeleton__block-item"></div>
     </div>
 
-    <div :style="setBlockSize(128, 30)" class="skeleton__block">
-      <div :style="setBlockSize(60, 18)" class="skeleton__block-item"></div>
+    <div
+      style="width: 100%"
+      class="skeleton__block--wrap skeleton__block--hide-on-desk skeleton__block--hide-on-tab"
+    >
+      <div
+        :style="`${setBlockSize(112, 18)}`"
+        class="skeleton__block-item"
+      ></div>
 
-      <div :style="setBlockSize(60, 30)" class="skeleton__block-item"></div>
+      <div :style="setBlockSize(320, 30)" class="skeleton__block-item"></div>
+    </div>
+
+    <div :style="setBlockSize(153, 30)" class="skeleton__block skeleton__block--hide-on-mob">
+      <div :style="setBlockSize(56, 18)" class="skeleton__block-item"></div>
+
+      <div :style="setBlockSize(90, 30)" class="skeleton__block-item"></div>
     </div>
   </div>
 </template>
@@ -26,7 +38,7 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
 }
 
 .products__search-and-sort-panel {
-  margin-bottom: var(--margin-bottom-8);
+  margin-bottom: var(--space-8);
   justify-content: space-between;
 }
 
@@ -36,6 +48,37 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
 
   .skeleton__block-item {
     @include skeleton-block();
+  }
+}
+
+@media (max-width: $mobile-breakpoint) {
+  .skeleton__block--wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    .skeleton__block-item {
+      @include skeleton-block();
+    }
+  }
+}
+
+@media (min-width: $desktop-breakpoint) {
+  .skeleton__block--hide-on-desk {
+    display: none;
+  }
+}
+
+@media (min-width: $mobile-breakpoint) and (max-width: $tablet-breakpoint) {
+  .skeleton__block--hide-on-tab {
+    display: none;
+  }
+}
+
+@media (max-width: $mobile-breakpoint) {
+  .skeleton__block--hide-on-mob {
+    display: none;
   }
 }
 </style>

@@ -9,29 +9,47 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
       class="product-skeleton__item product-skeleton__item--image"
     ></div>
 
-    <div class="product-skeleton__info">
-      <div :style="setBlockSize(262, 22)" class="product-skeleton__item"></div>
-      <div :style="setBlockSize(140, 22)" class="product-skeleton__item"></div>
+    <div
+      :style="`${setBlockSize(180, 16)}margin-bottom: 4px;`"
+      class="product-skeleton__item"
+    ></div>
+    <div :style="`${setBlockSize(60, 16)}margin-bottom: 8px;`" class="product-skeleton__item"></div>
 
-      <div class="product-skeleton__info-stars-wrapper">
-        <div :style="setBlockSize(100)" class="product-skeleton__item"></div>
-        <div :style="setBlockSize(22)" class="product-skeleton__item"></div>
-      </div>
+    <div class="product-skeleton__item-group-column product-skeleton__item--on-device">
+      <div :style="`${setBlockSize(120, 16)}margin-top: 4px;`" class="product-skeleton__item"></div>
 
-      <div :style="setBlockSize(150, 18)" class="product-skeleton__item"></div>
+      <div :style="`${setBlockSize(135, 16)}margin-top: 4px;`" class="product-skeleton__item"></div>
 
-      <div class="product-skeleton__info-common">
-        <div :style="setBlockSize(120)" class="product-skeleton__item"></div>
-        <div :style="setBlockSize(130)" class="product-skeleton__item"></div>
-        <div :style="setBlockSize(284)" class="product-skeleton__item"></div>
-        <div :style="setBlockSize(120)" class="product-skeleton__item"></div>
-      </div>
+      <div style="margin: 8px 0 12px" class="product-skeleton__item-group-column">
+        <div style="margin-bottom: 4px" class="product-skeleton__item-group">
+          <div :style="`${setBlockSize(46, 15)}`" class="product-skeleton__item"></div>
+          <div :style="`${setBlockSize(108, 15)}`" class="product-skeleton__item"></div>
+        </div>
 
-      <div class="product-skeleton__info-price-and-availability">
-        <div :style="setBlockSize(102, 24)" class="product-skeleton__item"></div>
-        <div :style="setBlockSize(90, 24)" class="product-skeleton__item"></div>
+        <div style="margin-bottom: 4px" class="product-skeleton__item-group">
+          <div :style="`${setBlockSize(65, 15)}`" class="product-skeleton__item"></div>
+          <div :style="`${setBlockSize(45, 15)}`" class="product-skeleton__item"></div>
+        </div>
+
+        <div :style="`${setBlockSize(140, 15)}`" class="product-skeleton__item"></div>
       </div>
     </div>
+
+    <div class="product-skeleton__item-group">
+      <div
+        :style="`${setBlockSize(40, 16)}margin-bottom: 16px;`"
+        class="product-skeleton__item"
+      ></div>
+      <div
+        :style="`${setBlockSize(60, 22)}margin-bottom: 16px;`"
+        class="product-skeleton__item"
+      ></div>
+    </div>
+
+    <div
+      :style="`${setBlockSize(204, 32)}border-radius: 8px;`"
+      class="product-skeleton__item"
+    ></div>
   </div>
 </template>
 
@@ -43,8 +61,21 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
   border-radius: 12px;
   border: 2px solid var(--grey-light);
   background: var(--grey-light);
-  padding: 16px;
+  padding: 14px;
   cursor: pointer;
+
+  .product-skeleton__item-group {
+    @include skeleton-block-group();
+  }
+
+  .product-skeleton__item-group-column {
+    @include skeleton-block-group-column();
+    width: 100%;
+
+    .product-skeleton__item-group {
+      width: 100%;
+    }
+  }
 
   .product-skeleton__item {
     @include skeleton-block();
@@ -52,7 +83,11 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
 
   .product-skeleton__item--image {
     align-self: center;
-    margin-bottom: var(--margin-bottom-4);
+    margin-bottom: var(--space-4);
+
+    @media (max-width: $tablet-breakpoint) {
+      max-width: 100% !important;
+    }
   }
 
   .product__info {
@@ -63,7 +98,7 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
 
   .product-skeleton__info {
     > .product-skeleton__item:nth-child(2) {
-      margin-top: var(--margin-top-4);
+      margin-top: var(--space-4);
     }
   }
 
@@ -72,32 +107,42 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
     justify-content: start;
     align-items: center;
     gap: 4px;
-    margin-top: var(--margin-top-4);
+    margin-top: var(--space-4);
 
     + .product-skeleton__item {
-      margin-top: var(--margin-top-8);
+      margin-top: var(--space-8);
     }
   }
 
   .product-skeleton__info-common {
-    margin-top: var(--margin-top-8);
-    margin-bottom: var(--margin-bottom-12);
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-12);
 
     .product-skeleton__item:nth-child(2),
     .product-skeleton__item:nth-child(3) {
-      margin-top: var(--margin-top-4);
+      margin-top: var(--space-4);
     }
 
     .product-skeleton__item:nth-child(4) {
-      margin-top: var(--margin-top-4);
+      margin-top: var(--space-4);
     }
   }
 
   .product-skeleton__info-price-and-availability {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
-    margin-top: var(--margin-top-8);
+    margin-top: var(--space-8);
+  }
+
+  .product-skeleton__item--on-device {
+    display: none;
+  }
+
+  @media (max-width: $tablet-breakpoint) {
+    .product-skeleton__item--on-device {
+      display: flex;
+    }
   }
 }
 </style>

@@ -10,7 +10,7 @@
   align-items: center;
   justify-content: start;
   gap: 8px;
-  margin-top: var(--margin-top-16);
+  margin-top: var(--space-16);
 
   .skeleton__block-item {
     @include skeleton-block();

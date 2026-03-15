@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface IProps {
-  actualLimit: {key: number}
+  actualLimit: { key: number }
 }
 
 const props = defineProps<IProps>()
@@ -16,21 +16,29 @@ const props = defineProps<IProps>()
       </template>
     </div>
 
-    <SkeletonProductShowOnPage />
+    <SkeletonProductShowOnPage class="products-show-on-page" />
 
     <SkeletonProductMoreBtn />
   </div>
 </template>
 
 <style scoped lang="scss">
-.products__grid {
-  display: grid;
-  grid-auto-rows: max-content;
-  column-gap: 24px;
-  row-gap: 20px;
-  width: 100%;
-  margin: 0 auto;
-  grid-template-columns: repeat(auto-fill, minmax(226px, 1fr));
-  margin-bottom: var(--margin-bottom-16);
+.products__products-skeleton {
+  display: flex;
+  flex-direction: column;
+
+  .products__grid {
+    display: grid;
+    grid-auto-rows: max-content;
+    column-gap: 24px;
+    row-gap: 20px;
+    width: 100%;
+    margin: 0 auto;
+    grid-template-columns: repeat(auto-fill, minmax(226px, 1fr));
+  }
+
+  .products-show-on-page {
+    justify-content: end;
+  }
 }
 </style>

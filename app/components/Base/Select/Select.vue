@@ -32,7 +32,6 @@ const selectOption = () => {
 
     <div class="base-select__wrapper">
       <div class="base-select__input" @click="toggleDropdown" tabindex="0">
-        {{ modelValue?.key || 'Select' }}
         <span
           v-if="modelValue?.order"
           :class="[
@@ -40,6 +39,13 @@ const selectOption = () => {
             `${modelValue.order === 'asc' ? 'base-select__active-sort-arrow--asc' : 'base-select__active-sort-arrow--desc'}`
           ]"
         ></span>
+        <div class="base-select__input-content">
+          {{ modelValue?.key || 'Select' }}
+        </div>
+
+        <div
+          :class="['base-select__state-arrow', { 'base-select__state-arrow--opened': isOpened }]"
+        ></div>
       </div>
 
       <ul v-if="isOpened" class="base-select__list">
@@ -64,8 +70,9 @@ const selectOption = () => {
 }
 
 .base-select__input {
+  position: relative;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   padding: 8px 12px;
   background: var(--white);
@@ -73,7 +80,29 @@ const selectOption = () => {
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
-  min-width: 100px;
+  min-width: 60px;
+
+  .base-select__input-content {
+    margin-right: 8px;
+  }
+
+  .base-select__state-arrow {
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+    margin-left: auto;
+    position: relative;
+    top: -2px;
+
+    &.base-select__state-arrow--opened {
+      top: 2px;
+      transform: rotate(225deg);
+    }
+  }
 }
 
 .base-select__list {
@@ -93,7 +122,7 @@ const selectOption = () => {
 
 .base-select__arrow {
   font-size: 0.8em;
-  transition: transform 0.3s;
+  transition: transform 0.2s;
 }
 
 .base-select--open .base-select__arrow {

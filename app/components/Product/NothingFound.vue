@@ -24,11 +24,11 @@ const emit = defineEmits<{
   margin-top: calc(50vh - 100px);
 
   .nothing-found__header {
-    margin-bottom: var(--margin-bottom-12);
+    margin-bottom: var(--space-12);
   }
 
   .nothing-found__text {
-    margin-bottom: var(--margin-bottom-8);
+    margin-bottom: var(--space-8);
   }
 
   .nothing-found__btn {

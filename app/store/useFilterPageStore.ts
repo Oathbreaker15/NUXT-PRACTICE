@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { computed } from 'vue'
 
-export const FilterPageStore = defineStore('FilterPageStore', () => {
+export const FilterPageStore = defineStore('filter-page', () => {
   const route = useRoute()
-  const FILTER_ITEMS_AMOUNT = 7
+  const DEFAULT_SKELETON_COUNT = 7
   const products = ref<ProductType[]>([])
   const filters = ref<ProductsFiltersAPIResponse>({})
-  const filterObj = ref<ProductsFiltersAPIResponse>({})
+  const activeFilters = ref<ProductsFiltersAPIResponse>({})
   const sortArr = ref<SortType[]>([
     { key: 'title', order: 'asc' },
     { key: 'title', order: 'desc' },
@@ -17,24 +17,27 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
   ])
   const LIMITS_ARR = [{ key: 8 }, { key: 16 }, { key: 32 }, { key: 64 }] as const
   const actualLimit = ref<LimitValue>({ key: 8 })
-  const currentSortItem = ref<SortType | undefined>(undefined)
-
-  const searchInProductsQuery = ref('')
-
-  const panelItemsOpenedState = ref<Record<string, boolean>>({})
-  const isFetchingProducts = ref(true)
-  const isFetchingFilters = ref(true)
+  const currentSortType = ref<SortType | undefined>(undefined)
+  const searchQuery = ref('')
   const queryObj = reactive({
     limit: actualLimit,
     skip: 0,
     total: 0
   })
 
-  const loadProducts = async () => {
-    products.value = []
-    queryObj.skip = 0
+  const searchInProductsQuery = ref('')
 
-    const searchQuery = route.query.q as string
+  const panelItemsOpenedState = ref<Record<string, boolean>>({})
+  const isFetchingProducts = ref(true)
+  const isFetchingFilters = ref(true)
+
+  const loadProducts = async (resetRequired = true) => {
+    if (resetRequired) {
+      products.value = []
+      queryObj.skip = 0
+    }
+
+    const searchQuery = (route.query.q || '') as string
 
     if (searchQuery) {
       await fetchProductsSearch(searchQuery)
@@ -66,9 +69,10 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
 
   const fetchProductsSearch = async (q: string) => {
     try {
+      searchQuery.value = q
       isFetchingProducts.value = true
       const dataProducts = await $fetch<ProductsAPIResponse>(`/api/ProductsSearch`, {
-        query: { q }
+        query: { q, limit: queryObj.limit.key, skip: queryObj.skip }
       })
       if (dataProducts?.products) {
         products.value = [...products.value, ...dataProducts.products]
@@ -118,19 +122,19 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
     category: keyof ProductsFiltersAPIResponse,
     filterParam: string
   ): void => {
-    if (!filterObj.value[category]) {
-      filterObj.value[category] = [filterParam]
+    if (!activeFilters.value[category]) {
+      activeFilters.value[category] = [filterParam]
     } else {
-      if (filterObj.value[category].includes(filterParam)) {
-        filterObj.value[category] = filterObj.value[category].filter(
+      if (activeFilters.value[category].includes(filterParam)) {
+        activeFilters.value[category] = activeFilters.value[category].filter(
           (filter) => filter !== filterParam
         )
 
-        if (!filterObj.value[category].length) {
-          delete filterObj.value[category]
+        if (!activeFilters.value[category].length) {
+          delete activeFilters.value[category]
         }
       } else {
-        filterObj.value[category] = [...filterObj.value[category], filterParam]
+        activeFilters.value[category] = [...activeFilters.value[category], filterParam]
       }
     }
   }
@@ -152,7 +156,7 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
       }
     })
 
-    currentSortItem.value = category
+    currentSortType.value = category
     products.value = result
   }
 
@@ -165,7 +169,7 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
   }
 
   const clearFilterObj = () => {
-    filterObj.value = {}
+    activeFilters.value = {}
   }
 
   const clearSearchInProductsQuery = () => {
@@ -178,16 +182,17 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
   }
 
   const filteredProducts = computed(() => {
-    const keys = Object.keys(filterObj.value) as Array<keyof ProductsFiltersAPIResponse>
+    const keys = Object.keys(activeFilters.value) as Array<keyof ProductsFiltersAPIResponse>
+    if (!keys.length) return products.value
 
     return products.value.filter((product) => {
       return keys.every((key) => {
         if (Array.isArray(product[key])) {
           return product[key]?.some((filterValue) => {
-            return filterObj.value[key]?.includes(filterValue)
+            return activeFilters.value[key]?.includes(filterValue)
           })
         } else {
-          if (typeof product[key] === 'string' && filterObj.value[key]?.includes(product[key])) {
+          if (typeof product[key] === 'string' && activeFilters.value[key]?.includes(product[key])) {
             return true
           }
         }
@@ -195,11 +200,34 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
     })
   })
 
+  const sortedProducts = computed(() => {
+    const sortItem = currentSortType.value
+    if (sortItem === undefined) return filteredProducts.value
+
+    const arr = Array.from(filteredProducts.value)
+
+    return arr.sort((a, b) => {
+      if (sortItem.order === 'asc') {
+        if (typeof a[sortItem.key] === 'string') {
+          return String(a[sortItem.key]).localeCompare(String(b[sortItem.key]))
+        }
+
+        return +a[sortItem.key] - +b[sortItem.key]
+      } else {
+        if (typeof a[sortItem.key] === 'string') {
+          return String(b[sortItem.key]).localeCompare(String(a[sortItem.key]))
+        }
+
+        return +b[sortItem.key] - +a[sortItem.key]
+      }
+    })
+  })
+
   const searchedByQueryProducts = computed(() => {
     const query = searchInProductsQuery.value.toLowerCase().trim()
-    if (!query || query.length < 3) return filteredProducts.value
+    if (!query || query.length < 3) return sortedProducts.value
 
-    return filteredProducts.value.filter(
+    return sortedProducts.value.filter(
       (product) =>
         product.title.toLowerCase().includes(query) || product.brand?.toLowerCase().includes(query)
     )
@@ -211,7 +239,14 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
   const isPanelAllOpened = computed(() =>
     Object.values(panelItemsOpenedState.value).every((item) => !!item)
   )
-  const isResetBtnDisabled = computed(() => !Object.keys(filterObj.value).length)
+  const skeletonCount = computed(() => {
+    if (Object.keys(filters.value).length) {
+      return Object.keys(filters.value).length
+    }
+    return DEFAULT_SKELETON_COUNT
+  })
+
+  const isResetBtnDisabled = computed(() => !Object.keys(activeFilters.value).length)
   const totalRemains = computed(() => queryObj.total - queryObj.skip)
 
   const initData = async () => {
@@ -219,12 +254,10 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
     await loadProducts()
   }
 
-  // initData()
-
   return {
-    FILTER_ITEMS_AMOUNT,
+    skeletonCount,
     filters,
-    filterObj,
+    activeFilters,
     initData,
     sortArr,
     LIMITS_ARR,
@@ -232,9 +265,10 @@ export const FilterPageStore = defineStore('FilterPageStore', () => {
     isFetchingFilters,
     searchInProductsQuery,
     actualLimit,
-    currentSortItem,
+    currentSortType,
+    searchQuery,
 
-    fetchProductsAll,
+    loadProducts,
     panelItemsOpenedState,
     togglePanelItemsOpenedState,
     togglePanelItemsOpenedStateItem,

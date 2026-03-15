@@ -4,9 +4,9 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
 
 <template>
   <div class="skeleton__block">
-    <div :style="setBlockSize(113, 18)" class="skeleton__block-item"></div>
+    <div :style="setBlockSize(106, 18)" class="skeleton__block-item"></div>
 
-    <div :style="setBlockSize(40, 30)" class="skeleton__block-item"></div>
+    <div :style="setBlockSize(60, 30)" class="skeleton__block-item"></div>
   </div>
 </template>
 
@@ -16,7 +16,7 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
   align-items: center;
   justify-content: start;
   gap: 8px;
-  margin-top: var(--margin-top-16);
+  margin-top: var(--space-16);
 
   .skeleton__block-item {
     @include skeleton-block();
