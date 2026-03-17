@@ -36,7 +36,8 @@ const {
   isFetchingProducts,
   activeFilters,
   panelItemsOpenedState,
-  isFetchingFilters
+  isFetchingFilters,
+  isPaginationHiddenForSearchResults
 } = storeToRefs(store)
 
 const { isDesktop, isMobile } = useDeviceType()
@@ -54,6 +55,10 @@ onMounted(() => {
   <h1 v-if="!!searchQuery" class="search-result-header">
     Search results for <span class="search-result-header__query">{{ searchQuery }}</span>
   </h1>
+
+  <div class="back-to-main-page-link__wrapper">
+    <nuxt-link :to="{ path: '/' }" class="back-to-main-page-link">back</nuxt-link>
+  </div>
 
   <div class="products">
     <div class="products__filter-panel">
@@ -218,7 +223,7 @@ onMounted(() => {
           </div>
 
           <button
-            v-if="totalRemains > 0"
+            v-if="totalRemains > 0 && !isPaginationHiddenForSearchResults"
             type="submit"
             :disabled="isFetchingProducts"
             :class="['products__get-more-btn', { loader: isFetchingProducts }]"
@@ -250,7 +255,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .search-result-header {
-  margin-bottom: var(--space-24);
+  margin-bottom: var(--space-16);
 
   .search-result-header__query {
     color: var(--brand);
@@ -345,6 +350,17 @@ onMounted(() => {
       max-width: 304px;
       position: absolute;
     }
+  }
+}
+
+.back-to-main-page-link__wrapper {
+  margin: 8px 0;
+
+  .back-to-main-page-link {
+    color: var(--link);
+    text-decoration: none;
+
+    @include hover-active-brand-text-color();
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProductType } from '~~/shared/types/Product/ProductType'
+import type { ProductType } from '~~/shared/types/ProductType'
 import { PRODUCT_PATHS } from '~/constants/product/paths'
 const fallbackProductImg = PRODUCT_PATHS.FALLBACK_IMAGE
 
@@ -24,7 +24,8 @@ const availabilityStatusClass = computed(() => {
 })
 
 const addToCart = () => {
-  alert('there is no cart yet hehe')
+  // TODO: Implement cart functionality someday
+  console.log('Add to cart:', props.product.id)
 }
 </script>
 
@@ -130,6 +131,8 @@ const addToCart = () => {
 
   .product__image-wrapper {
     position: relative;
+    max-height: 200px;
+    margin-bottom: 4px;
 
     .product__image-stars-wrapper {
       position: absolute;
@@ -207,7 +210,8 @@ const addToCart = () => {
 
     .product__info-title {
       font-size: 16px;
-      line-height: 16px;
+      line-height: 1.25;
+      min-height: 40px;
       font-weight: 700;
       color: var(--black);
       margin-bottom: 8px;

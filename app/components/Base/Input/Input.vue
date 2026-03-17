@@ -9,10 +9,12 @@ interface IProps {
   customWidth?: string
   customHeight?: string
   fullWidthMobile?: boolean
+  withResetBtn?: boolean
 }
 
 const props = withDefaults(defineProps<IProps>(), {
-  fullWidthMobile: true
+  fullWidthMobile: true,
+  withResetBtn: true
 })
 
 const model = defineModel<string>({ required: true })
@@ -68,10 +70,10 @@ const emit = defineEmits<{
         type="text"
         inputmode="text"
         :placeholder="placeholder"
-        class="base-input__input"
+        :class="['base-input__input', { 'base-input__input--with-button': btnText }, {'base-input__input--with-reset': props.withResetBtn}]"
       />
 
-      <span v-if="model.length" class="base-input__clear" @click="model = ''"></span>
+      <span v-if="model.length && props.withResetBtn" class="base-input__clear" @click="model = ''"></span>
 
       <button v-if="!!btnText" class="base-input__btn" type="submit">
         {{ btnText }}
@@ -99,6 +101,18 @@ const emit = defineEmits<{
   .base-input__input {
     width: 100%;
     height: 100%;
+
+    &.base-input__input--with-reset {
+      padding-right: 32px;
+    }
+
+    &.base-input__input--with-button {
+      padding-right: 112px;
+
+      + .base-input__clear {
+        right: 84px;
+      }
+    }
   }
 
   .base-input__clear {
@@ -111,10 +125,14 @@ const emit = defineEmits<{
     background: url('~/assets/svg/clear.svg') no-repeat 0 0;
     background-size: cover;
 
-    @include hover-active-opacity(0.6);
+    @media (hover: hover) {
+      &:hover {
+        background-position-y: -24px;
+      }
+    }
 
     &:active {
-      background-position-y: -24px;
+      background-position-y: -48px;
     }
   }
 

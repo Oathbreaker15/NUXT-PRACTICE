@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { setBlockSize } from '@/composables/useSkeletonBlockSize'
+import { setBlockSize } from '~/utils/useSkeletonBlockSize'
 interface IProps {
   filterItemsAmount: number
 }

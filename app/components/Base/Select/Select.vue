@@ -72,6 +72,7 @@ const selectOption = () => {
 .base-select__input {
   position: relative;
   display: flex;
+  height: 32px;
   justify-content: flex-start;
   align-items: center;
   padding: 8px 12px;

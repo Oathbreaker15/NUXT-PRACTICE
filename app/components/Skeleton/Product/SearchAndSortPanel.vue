@@ -1,31 +1,28 @@
 <script setup lang="ts">
-import { setBlockSize } from '@/composables/useSkeletonBlockSize'
+import { setBlockSize } from '~/utils/useSkeletonBlockSize'
 </script>
 
 <template>
   <div class="products__search-and-sort-panel">
-    <div :style="setBlockSize(332, 30)" class="skeleton__block skeleton__block--hide-on-mob">
+    <div :style="setBlockSize(342, 32)" class="skeleton__block skeleton__block--hide-on-mob">
       <div :style="setBlockSize(112, 18)" class="skeleton__block-item"></div>
 
-      <div :style="setBlockSize(202, 35)" class="skeleton__block-item"></div>
+      <div :style="setBlockSize(212, 32)" class="skeleton__block-item"></div>
     </div>
 
     <div
       style="width: 100%"
       class="skeleton__block--wrap skeleton__block--hide-on-desk skeleton__block--hide-on-tab"
     >
-      <div
-        :style="`${setBlockSize(112, 18)}`"
-        class="skeleton__block-item"
-      ></div>
+      <div :style="`${setBlockSize(112, 18)}`" class="skeleton__block-item"></div>
 
       <div :style="setBlockSize(320, 30)" class="skeleton__block-item"></div>
     </div>
 
-    <div :style="setBlockSize(153, 30)" class="skeleton__block skeleton__block--hide-on-mob">
+    <div :style="setBlockSize(153, 32)" class="skeleton__block skeleton__block--hide-on-mob">
       <div :style="setBlockSize(56, 18)" class="skeleton__block-item"></div>
 
-      <div :style="setBlockSize(90, 30)" class="skeleton__block-item"></div>
+      <div :style="setBlockSize(90, 32)" class="skeleton__block-item"></div>
     </div>
   </div>
 </template>

@@ -42,15 +42,15 @@ const toggleItemVisibility = (category: keyof ProductsFiltersAPIResponse) => {
       <div v-show="isPanelOpened" class="filter-item__content">
         <label
           v-for="(value, i) in props.filter"
-          :key="value.id"
-          :for="value.id"
+          :key="value"
+          :for="value"
           :class="[
             'filter-item__value',
             isToggled ? 'filter-item__toggler--opened' : 'filter-item__toggler--closed'
           ]"
         >
           <input
-            :id="value.id"
+            :id="value"
             type="checkbox"
             :name="value"
             :checked="isChecked(value)"

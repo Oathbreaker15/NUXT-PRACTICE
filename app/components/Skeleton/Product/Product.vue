@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { setBlockSize } from '@/composables/useSkeletonBlockSize'
+import { setBlockSize } from '~/utils/useSkeletonBlockSize'
 </script>
 
 <template>
@@ -10,7 +10,7 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
     ></div>
 
     <div
-      :style="`${setBlockSize(180, 16)}margin-bottom: 4px;`"
+      :style="`${setBlockSize(180, 16)}margin-bottom: 8px;`"
       class="product-skeleton__item"
     ></div>
     <div :style="`${setBlockSize(60, 16)}margin-bottom: 8px;`" class="product-skeleton__item"></div>
@@ -37,17 +37,17 @@ import { setBlockSize } from '@/composables/useSkeletonBlockSize'
 
     <div class="product-skeleton__item-group">
       <div
-        :style="`${setBlockSize(40, 16)}margin-bottom: 16px;`"
+        :style="`${setBlockSize(40, 16)}`"
         class="product-skeleton__item"
       ></div>
       <div
-        :style="`${setBlockSize(60, 22)}margin-bottom: 16px;`"
+        :style="`${setBlockSize(60, 22)}`"
         class="product-skeleton__item"
       ></div>
     </div>
 
     <div
-      :style="`${setBlockSize(204, 32)}border-radius: 8px;`"
+      :style="`${setBlockSize(204, 32)}border-radius: 8px;margin-top: 16px;`"
       class="product-skeleton__item"
     ></div>
   </div>

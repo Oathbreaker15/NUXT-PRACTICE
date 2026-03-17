@@ -19,6 +19,7 @@ export const FilterPageStore = defineStore('filter-page', () => {
   const actualLimit = ref<LimitValue>({ key: 8 })
   const currentSortType = ref<SortType | undefined>(undefined)
   const searchQuery = ref('')
+  const isPaginationHiddenForSearchResults = ref(false)
   const queryObj = reactive({
     limit: actualLimit,
     skip: 0,
@@ -35,11 +36,13 @@ export const FilterPageStore = defineStore('filter-page', () => {
     if (resetRequired) {
       products.value = []
       queryObj.skip = 0
+      isPaginationHiddenForSearchResults.value = false
     }
 
     const searchQuery = (route.query.q || '') as string
 
     if (searchQuery) {
+      isPaginationHiddenForSearchResults.value = true
       await fetchProductsSearch(searchQuery)
     } else {
       await fetchProductsAll()
@@ -140,24 +143,7 @@ export const FilterPageStore = defineStore('filter-page', () => {
   }
 
   const sortProducts = (category: SortType) => {
-    const result = products.value.sort((a, b) => {
-      if (category.order === 'asc') {
-        if (typeof a[category.key] === 'string') {
-          return String(a[category.key]).localeCompare(String(b[category.key]))
-        }
-
-        return +a[category.key] - +b[category.key]
-      } else {
-        if (typeof a[category.key] === 'string') {
-          return String(b[category.key]).localeCompare(String(a[category.key]))
-        }
-
-        return +b[category.key] - +a[category.key]
-      }
-    })
-
     currentSortType.value = category
-    products.value = result
   }
 
   const searchByQuery = (query: string) => {
@@ -267,7 +253,7 @@ export const FilterPageStore = defineStore('filter-page', () => {
     actualLimit,
     currentSortType,
     searchQuery,
-
+    isPaginationHiddenForSearchResults,
     loadProducts,
     panelItemsOpenedState,
     togglePanelItemsOpenedState,
